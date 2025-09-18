@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interaktiv projektil-simulator</title>
+    <!-- Version: 1.2.3 - Opdateret: 2024-12-19 -->
 
     <!-- MathJax for LaTeX rendering -->
     <script>
@@ -20,6 +21,7 @@
             }
         };
     </script>
+    <!-- Polyfill fjernet - ikke nødvendigt for moderne browsere -->
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
     <style>
@@ -50,7 +52,11 @@
         }
 
         .grid {
+            display: -ms-grid;
+            /* IE11 fallback */
             display: grid;
+            -ms-grid-columns: 1fr 3fr;
+            /* IE11 fallback */
             grid-template-columns: 1fr 3fr;
             gap: 2rem;
         }
@@ -278,6 +284,9 @@
         <h1><span style="color: #333;">Kinematik i 2D - simulering</span> <span style="color: #16a34a;">med</span> <span
                 style="color: #333;">og</span> <span style="color: #2563eb;">uden</span> <span
                 style="color: #333;">luftmodstand</span></h1>
+        <div style="position: absolute; top: 10px; right: 15px; font-size: 0.6rem; color: #999; opacity: 0.7;">
+            v1.2.3
+        </div>
 
         <div class="grid">
             <div class="control-panel">
@@ -350,9 +359,10 @@
                                     style="text-align: center; padding: 0.5rem; background: white; border-radius: 4px;">
                                     <svg width="80" height="40"
                                         style="border: 1px solid #ddd; border-radius: 4px; background: #f0f0f0;">
-                                        <path d="M20,20 Q25,15 35,18 Q45,20 50,20 Q45,22 35,22 Q25,25 20,20 Z"
+                                        <path
+                                            d="M15,20 Q20,12 30,15 Q40,18 50,18 Q60,20 65,20 Q60,22 50,22 Q40,25 30,25 Q20,28 15,20 Z"
                                             fill="#4caf50" stroke="#388e3c" stroke-width="1" />
-                                        <path d="M70,10 L55,10" stroke="#333" stroke-width="2" fill="none"
+                                        <path d="M40,20 L24,20" stroke="#333" stroke-width="2" fill="none"
                                             marker-end="url(#arrow-left)" />
                                     </svg>
                                     <div style="font-size: 0.7rem; margin-top: 0.25rem; color: #4caf50;">
@@ -366,9 +376,9 @@
                                     style="text-align: center; padding: 0.5rem; background: white; border-radius: 4px;">
                                     <svg width="80" height="40"
                                         style="border: 1px solid #ddd; border-radius: 4px; background: #f0f0f0;">
-                                        <circle cx="40" cy="20" r="8" fill="#ff9800" stroke="#f57c00"
+                                        <circle cx="40" cy="20" r="12" fill="#ff9800" stroke="#f57c00"
                                             stroke-width="1" />
-                                        <path d="M70,10 L55,10" stroke="#333" stroke-width="2" fill="none"
+                                        <path d="M45,20 L33,20" stroke="#333" stroke-width="2" fill="none"
                                             marker-end="url(#arrow-left)" />
                                     </svg>
                                     <div style="font-size: 0.7rem; margin-top: 0.25rem; color: #ff9800;">
@@ -383,16 +393,16 @@
                                     <svg width="80" height="40"
                                         style="border: 1px solid #ddd; border-radius: 4px; background: #f0f0f0;">
                                         <!-- 3D cylinder (roteret 180 grader) -->
-                                        <ellipse cx="42" cy="20" rx="3" ry="8" fill="#ba68c8" stroke="#9c27b0"
+                                        <ellipse cx="48" cy="20" rx="4" ry="12" fill="#ba68c8" stroke="#9c27b0"
                                             stroke-width="1" />
-                                        <rect x="26" y="12" width="16" height="16" fill="#ce93d8" stroke="#ba68c8"
+                                        <rect x="22" y="8" width="26" height="24" fill="#ce93d8" stroke="#ba68c8"
                                             stroke-width="1" />
-                                        <ellipse cx="26" cy="20" rx="3" ry="8" fill="#9c27b0" stroke="#7b1fa2"
+                                        <ellipse cx="22" cy="20" rx="4" ry="12" fill="#9c27b0" stroke="#7b1fa2"
                                             stroke-width="1" />
                                         <!-- 3D highlight -->
-                                        <ellipse cx="41" cy="20" rx="2" ry="6" fill="#e1bee7" opacity="0.6" />
-                                        <rect x="27" y="13" width="10" height="16" fill="#e1bee7" opacity="0.3" />
-                                        <path d="M70,10 L55,10" stroke="#333" stroke-width="2" fill="none"
+                                        <ellipse cx="41" cy="20" rx="3" ry="8" fill="#e1bee7" opacity="0.6" />
+                                        <rect x="23" y="9" width="14" height="22" fill="#e1bee7" opacity="0.3" />
+                                        <path d="M44,20 L30,20" stroke="#333" stroke-width="2" fill="none"
                                             marker-end="url(#arrow-left)" />
                                     </svg>
                                     <div style="font-size: 0.7rem; margin-top: 0.25rem; color: #9c27b0;">
@@ -408,7 +418,7 @@
                                         style="border: 1px solid #ddd; border-radius: 4px; background: #f0f0f0;">
                                         <ellipse cx="40" cy="20" rx="5" ry="16" fill="#f44336" stroke="#d32f2f"
                                             stroke-width="1" />
-                                        <path d="M70,10 L55,10" stroke="#333" stroke-width="2" fill="none"
+                                        <path d="M40,20 L25,20" stroke="#333" stroke-width="2" fill="none"
                                             marker-end="url(#arrow-left)" />
                                     </svg>
                                     <div style="font-size: 0.7rem; margin-top: 0.25rem; color: #f44336;">
@@ -429,8 +439,7 @@
                             </svg>
 
                             <div style="font-size: 0.7rem; color: #666; text-align: center; margin-top: 0.5rem;">
-                                <strong>Bevægelsesretning:</strong> Alle objekter bevæger sig mod venstre (←) mod
-                                luftstrømmen
+                                <strong>Bevægelsesretning:</strong> Alle objekter bevæger sig mod venstre.
                             </div>
                         </div>
                     </div>
@@ -453,9 +462,9 @@
             <div class="canvas-container" style="position: relative;">
                 <!-- Credit - diskret ovenpå venstre canvas -->
                 <div
-                    style="position: absolute; top: 5px; left: 25px; z-index: 5; color: #999; font-size: 0.6rem; opacity: 0.6;">
+                    style="position: absolute; top: 5px; left: 25px; z-index: 5; color: #5d817e;; font-size: 0.6rem; opacity: 1;">
                     Philip Kruse Jakobsen • <a href="mailto:pj@sg.dk"
-                        style="color: #999; text-decoration: none;">pj@sg.dk</a>
+                        style="color: #5d817e; text-decoration: none;">pj@sg.dk</a>
                 </div>
 
                 <!-- Graf signatur øverst i højre hjørne -->
@@ -640,6 +649,9 @@
 
         // Helper function to format numbers with Danish decimal comma
         function formatNumber(num, decimals = 2) {
+            if (isNaN(num) || !isFinite(num)) {
+                return 'NaN';
+            }
             return num.toFixed(decimals).replace('.', ',');
         }
 
@@ -1021,8 +1033,9 @@
 
         function updateCalculationDisplay() {
             // Calculate velocity components
-            const vx0 = v0 * Math.cos(angle);
-            const vy0 = v0 * Math.sin(angle);
+            const angleRad = (angleDeg * Math.PI) / 180;
+            const vx0 = v0 * Math.cos(angleRad);
+            const vy0 = v0 * Math.sin(angleRad);
             const deltaH = startHeight - targetHeight;
 
             // Calculate time using analytical formula
