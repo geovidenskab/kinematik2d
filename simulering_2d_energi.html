@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="da">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktiv projektil-simulator med energianalyse</title>
+    <!-- Version: 1.3.0 - Opdateret: 2024-12-19 - Tilføjet energianalyse -->
+
+    <!-- MathJax for LaTeX rendering -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true,
+                processEnvironments: true
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <!-- Polyfill fjernet - ikke nødvendigt for moderne browsere -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            color: #2563eb;
+        }
+
+        .grid {
+            display: -ms-grid;
+            /* IE11 fallback */
+            display: grid;
+            -ms-grid-columns: 1fr 3fr;
+            /* IE11 fallback */
+            grid-template-columns: 1fr 3fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .control-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .control-group {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .control-group h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: #374151;
+        }
+
+        .control-item {
+            margin-bottom: 1rem;
+        }
+
+        .control-item:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #374151;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+
+        input[type="checkbox"] {
+            margin-right: 0.5rem;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .color-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            margin-right: 0.5rem;
+        }
+
+        .blue {
+            background-color: #2563eb;
+        }
+
+        .green {
+            background-color: #16a34a;
+        }
+
+        .info-text {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+
+        .calculated-info {
+            background: #f3f4f6;
+            padding: 0.75rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .canvas-container {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        canvas {
+            width: 100%;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            display: block;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .result-box {
+            background: #f9fafb;
+            padding: 1rem;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .result-box h3 {
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            color: #374151;
+        }
+
+        .result-item {
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .result-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .mono {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+
+        .blue-text {
+            color: #2563eb;
+        }
+
+        .green-text {
+            color: #16a34a;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            margin-top: 0.75rem;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .formulas {
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 4px;
+            border: 1px solid #e5e7eb;
+            font-size: 0.75rem;
+        }
+
+        .formula-section {
+            margin-bottom: 0.75rem;
+        }
+
+        .formula-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .formula-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .formula-code {
+            font-family: 'Courier New', monospace;
+            background: #f3f4f6;
+            padding: 0.25rem 0.5rem;
+            border-radius: 2px;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .comparison-box {
+            background: #f9fafb;
+            padding: 1rem;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+            margin-top: 1rem;
+        }
+
+        .comparison-box h3 {
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            color: #374151;
+        }
+
+        .comparison-item {
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .comparison-item:last-child {
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1><span style="color: #333;">Kinematik i 2D - simulering</span> <span style="color: #16a34a;">med</span> <span
+                style="color: #333;">og</span> <span style="color: #2563eb;">uden</span> <span
+                style="color: #333;">luftmodstand</span></h1>
+        <div style="position: absolute; top: 10px; right: 15px; font-size: 0.6rem; color: #999; opacity: 0.7;">
+            v1.2.3
+        </div>
+
+        <div class="grid">
+            <div class="control-panel">
+
+                <!-- Startbetingelser -->
+                <div class="control-group">
+                    <h3>Startbetingelser</h3>
+
+                    <div class="control-item">
+                        <label>Starthastighed: <span id="v0-value">40,0</span> m/s</label>
+                        <input type="range" id="v0" min="10" max="100" step="0.1" value="40">
+                    </div>
+
+                    <div class="control-item">
+                        <label>Vinkel: <span id="angle-value">40,0</span>°</label>
+                        <input type="range" id="angle" min="-89" max="89" step="0.1" value="40">
+                        <div class="info-text">Negativ vinkel = skyd nedad</div>
+                    </div>
+
+                    <div class="control-item">
+                        <label>Masse: <span id="mass-value">0,145</span> kg</label>
+                        <input type="range" id="mass" min="0.01" max="1" step="0.01" value="0.145">
+                    </div>
+
+                    <div class="control-item">
+                        <label>Starthøjde: <span id="startHeight-value">0,0</span> m</label>
+                        <input type="range" id="startHeight" min="0" max="200" step="0.1" value="0">
+                    </div>
+
+                    <div class="control-item">
+                        <label>Sluthøjde: <span id="targetHeight-value">0,0</span> m</label>
+                        <input type="range" id="targetHeight" min="-50" max="200" step="0.1" value="0">
+                        <div class="info-text">Højdeforskel: <span id="heightDiff">0,0</span> m</div>
+                        <div class="info-text" style="font-size: 0.75rem; color: #666;">Kan være højere end start, men
+                            under toppunkt</div>
+                    </div>
+                </div>
+
+                <!-- Fysiske egenskaber -->
+                <div class="control-group">
+                    <h3>Fysiske egenskaber</h3>
+
+                    <div class="control-item">
+                        <label>Radius: <span id="radius-value">37,0</span> mm</label>
+                        <input type="range" id="radius" min="0.01" max="0.1" step="0.001" value="0.037">
+                        <div class="info-text">Areal: <span id="area-value">43,0</span> cm²</div>
+                    </div>
+
+                    <div class="control-item">
+                        <label>Formfaktor Cd: <span id="dragCoeff-value">0,47</span></label>
+                        <input type="range" id="dragCoeff" min="0.1" max="2" step="0.01" value="0.47">
+                        <div class="info-text">Kugle: 0,47, Skive: 1,17, Strømlinet: 0,04</div>
+                    </div>
+
+                    <div class="control-item">
+                        <label>Lufttæthed: <span id="rhoAir-value">1,225</span> kg/m³</label>
+                        <input type="range" id="rhoAir" min="0.5" max="1.5" step="0.001" value="1.225">
+                        <div class="info-text">Havniveau (20°C): 1,225 kg/m³</div>
+                    </div>
+
+
+                    <!-- Visuel illustration af luftmodstand -->
+                    <div class="control-group" style="margin-top: 1rem;">
+                        <h3>Drag coefficient illustration</h3>
+                        <div
+                            style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 6px; padding: 1rem; text-align: center;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                                <!-- Strømlinet -->
+                                <div
+                                    style="text-align: center; padding: 0.5rem; background: white; border-radius: 4px;">
+                                    <svg width="80" height="40"
+                                        style="border: 1px solid #ddd; border-radius: 4px; background: #f0f0f0;">
+                                        <path
+                                            d="M15,20 Q20,12 30,15 Q40,18 50,18 Q60,20 65,20 Q60,22 50,22 Q40,25 30,25 Q20,28 15,20 Z"
+                                            fill="#4caf50" stroke="#388e3c" stroke-width="1" />
+                                        <path d="M40,20 L24,20" stroke="#333" stroke-width="2" fill="none"
+                                            marker-end="url(#arrow-left)" />
+                                    </svg>
+                                    <div style="font-size: 0.7rem; margin-top: 0.25rem; color: #4caf50;">
+                                        <strong>Strømlinet</strong>
+                                    </div>
+                                    <div style="font-size: 0.65rem; color: #666;">Cd = 0,04-0,1</div>
+                                </div>
+
+                                <!-- Kugle -->
+                                <div
+                                    style="text-align: center; padding: 0.5rem; background: white; border-radius: 4px;">
+                                    <svg width="80" height="40"
+                                        style="border: 1px solid #ddd; border-radius: 4px; background: #f0f0f0;">
+                                        <circle cx="40" cy="20" r="12" fill="#ff9800" stroke="#f57c00"
+                                            stroke-width="1" />
+                                        <path d="M45,20 L33,20" stroke="#333" stroke-width="2" fill="none"
+                                            marker-end="url(#arrow-left)" />
+                                    </svg>
+                                    <div style="font-size: 0.7rem; margin-top: 0.25rem; color: #ff9800;">
+                                        <strong>Kugle</strong>
+                                    </div>
+                                    <div style="font-size: 0.65rem; color: #666;">Cd = 0,47</div>
+                                </div>
+
+                                <!-- Cylinder -->
+                                <div
+                                    style="text-align: center; padding: 0.5rem; background: white; border-radius: 4px;">
+                                    <svg width="80" height="40"
+                                        style="border: 1px solid #ddd; border-radius: 4px; background: #f0f0f0;">
+                                        <!-- 3D cylinder (roteret 180 grader) -->
+                                        <ellipse cx="48" cy="20" rx="4" ry="12" fill="#ba68c8" stroke="#9c27b0"
+                                            stroke-width="1" />
+                                        <rect x="22" y="8" width="26" height="24" fill="#ce93d8" stroke="#ba68c8"
+                                            stroke-width="1" />
+                                        <ellipse cx="22" cy="20" rx="4" ry="12" fill="#9c27b0" stroke="#7b1fa2"
+                                            stroke-width="1" />
+                                        <!-- 3D highlight -->
+                                        <ellipse cx="41" cy="20" rx="3" ry="8" fill="#e1bee7" opacity="0.6" />
+                                        <rect x="23" y="9" width="14" height="22" fill="#e1bee7" opacity="0.3" />
+                                        <path d="M44,20 L30,20" stroke="#333" stroke-width="2" fill="none"
+                                            marker-end="url(#arrow-left)" />
+                                    </svg>
+                                    <div style="font-size: 0.7rem; margin-top: 0.25rem; color: #9c27b0;">
+                                        <strong>Cylinder</strong>
+                                    </div>
+                                    <div style="font-size: 0.65rem; color: #666;">Cd = 0,82</div>
+                                </div>
+
+                                <!-- Skive -->
+                                <div
+                                    style="text-align: center; padding: 0.5rem; background: white; border-radius: 4px;">
+                                    <svg width="80" height="40"
+                                        style="border: 1px solid #ddd; border-radius: 4px; background: #f0f0f0;">
+                                        <ellipse cx="40" cy="20" rx="5" ry="16" fill="#f44336" stroke="#d32f2f"
+                                            stroke-width="1" />
+                                        <path d="M40,20 L25,20" stroke="#333" stroke-width="2" fill="none"
+                                            marker-end="url(#arrow-left)" />
+                                    </svg>
+                                    <div style="font-size: 0.7rem; margin-top: 0.25rem; color: #f44336;">
+                                        <strong>Skive</strong>
+                                    </div>
+                                    <div style="font-size: 0.65rem; color: #666;">Cd = 1,17</div>
+                                </div>
+                            </div>
+
+                            <!-- Arrow markers -->
+                            <svg style="position: absolute; left: -9999px;">
+                                <defs>
+                                    <marker id="arrow-left" markerWidth="4" markerHeight="3" refX="3" refY="1.5"
+                                        orient="auto">
+                                        <polygon points="0 0, 4 1.5, 0 3" fill="#333" />
+                                    </marker>
+                                </defs>
+                            </svg>
+
+                            <div style="font-size: 0.7rem; color: #666; text-align: center; margin-top: 0.5rem;">
+                                <strong>Bevægelsesretning:</strong> Alle objekter bevæger sig mod venstre.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Numeriske indstillinger -->
+                <div class="control-group">
+                    <h3>Numeriske indstillinger</h3>
+
+                    <div class="control-item">
+                        <label>Tidsskridt dt: <span id="dt-value">0,0050</span> s</label>
+                        <input type="range" id="dt" min="0.001" max="0.02" step="0.001" value="0.005">
+                        <div class="info-text">Mindre værdier giver højere præcision</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="canvas-container" style="position: relative;">
+                <!-- Credit - diskret ovenpå venstre canvas -->
+                <div
+                    style="position: absolute; top: 5px; left: 25px; z-index: 5; color: #5d817e;; font-size: 0.6rem; opacity: 1;">
+                    Philip Kruse Jakobsen • <a href="mailto:pj@sg.dk"
+                        style="color: #5d817e; text-decoration: none;">pj@sg.dk</a>
+                </div>
+
+                <!-- Graf signatur øverst i højre hjørne -->
+                <div class="graph-legend"
+                    style="position: absolute; top: 30px; right: 30px; z-index: 10; background: rgba(255,255,255,0.0); border-radius: 4px; padding: 0.1rem; display: flex; flex-direction: column; gap: 0.05rem; font-size: 0.7rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <span style="color: #666; font-size: 0.65rem; font-weight: 500; text-align: left;">KLIK FOR AT
+                        VÆLGE</span>
+
+                    <div class="checkbox-group" style="display: flex; align-items: center; gap: 0.01rem;">
+                        <input type="checkbox" id="visKvadratiskNumerisk" checked style="display: none;">
+                        <span class="color-indicator green clickable-square" id="toggleKvadratiskNumerisk"
+                            style="width: 10px; height: 10px; cursor: pointer; border: 2px solid #16a34a; border-radius: 2px; opacity: 1; transition: opacity 0.2s;"></span>
+                        <span style="font-size: 0.55rem;">Med luftmodstand</span>
+                    </div>
+
+                    <div class="checkbox-group" style="display: flex; align-items: center; gap: 0.01rem;">
+                        <input type="checkbox" id="visUdenModstand" checked style="display: none;">
+                        <span class="color-indicator blue clickable-square" id="toggleUdenModstand"
+                            style="width: 10px; height: 10px; cursor: pointer; border: 2px solid #2563eb; border-radius: 2px; opacity: 1; transition: opacity 0.2s;"></span>
+                        <span style="font-size: 0.55rem;">Uden luftmodstand</span>
+                    </div>
+                </div>
+
+                <canvas id="canvas" width="800" height="500"></canvas>
+                
+                <div class="canvas-container" id="energyCanvasContainer" style="display: none; margin-top: 1rem;">
+                    <h3>Energianalyse</h3>
+                    <canvas id="energyCanvas" width="800" height="400"></canvas>
+                </div>
+                
+                <button id="toggleEnergyGraph" style="margin-top: 1rem;">Vis energianalyse</button>
+
+                <div class="results-grid">
+                    <div class="result-box">
+                        <h3 class="blue-text">Ingen luftmodstand</h3>
+                        <div class="result-item">Flyvetid: <span class="mono" id="T-value">0,00</span> s</div>
+                        <div class="result-item">Rækkevidde: <span class="mono" id="R-value">0,00</span> m</div>
+                        <div class="result-item">Maksimal højde: <span class="mono" id="H-value">0,00</span> m</div>
+                        <div class="info-text">Starthøjde: <span id="start-display">0</span> m → Sluthøjde: <span
+                                id="target-display">0</span> m</div>
+
+                        <button id="toggleFormulas">Vis beregning</button>
+
+                        <div id="formulas" class="formulas" style="display: none;">
+                            <div class="formula-section">
+                                <div class="formula-title blue-text">Differentialligninger:</div>
+                                <div class="formula-code">$\frac{d^2x}{dt^2} = 0$</div>
+                                <div class="formula-code">$\frac{d^2y}{dt^2} = -\mathrm{g}$</div>
+                            </div>
+                            <div class="formula-section">
+                                <div class="formula-title blue-text">Analytiske løsninger (generelle højder):</div>
+                                <div class="formula-code">$T = \frac{v_{0y} + \sqrt{v_{0y}^2 + 2g \cdot \Delta h}}{g}$
+                                </div>
+                                <div class="formula-code">$\Delta h = h_0 - h_{\text{target}} = $ <span
+                                        id="deltaH">0,0</span> m</div>
+                                <div class="formula-code">$R = v_{0x} \cdot T$</div>
+                                <div class="formula-code">$H = h_0 + \frac{v_{0y}^2}{2g}$</div>
+                                <div class="formula-code">$v_{0x} = v_0 \cos(\theta)$</div>
+                                <div class="formula-code">$v_{0y} = v_0 \sin(\theta)$</div>
+                            </div>
+                            <div class="formula-section">
+                                <div class="formula-title blue-text">Beregning for dette eksempel:</div>
+                                <div class="formula-code">$v_0 = $ <span id="calc-v0">40,0</span> m/s, $\theta = $ <span
+                                        id="calc-angle">45</span>°</div>
+                                <div class="formula-code">$v_{0x} = $ <span id="calc-v0x">28,3</span> m/s, $v_{0y} = $
+                                    <span id="calc-v0y">28,3</span> m/s
+                                </div>
+                                <div class="formula-code">$\Delta h = $ <span id="calc-deltaH">0,0</span> m</div>
+                                <div class="formula-code">$T = \frac{28{,}3 + \sqrt{(28{,}3)^2 + 2 \cdot 9{,}81 \cdot
+                                    0{,}0}}{9{,}81} = $ <span id="calc-T">5,77</span> s</div>
+                                <div class="formula-code">$R = 28{,}3 \cdot 5{,}77 = $ <span id="calc-R">163,3</span> m
+                                </div>
+                                <div class="formula-code">$H = 0{,}0 + \frac{(28{,}3)^2}{2 \cdot 9{,}81} = $ <span
+                                        id="calc-H">40,8</span> m</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="result-box">
+                        <h3 class="green-text">Med luftmodstand</h3>
+                        <div class="result-item">Modstand $\propto$ hastighed$^2$</div>
+                        <div class="formula-code">$F_{\mathrm{drag}} = \frac{1}{2} \cdot C_d \cdot \rho \cdot A \cdot
+                            v^2$
+                        </div>
+                        <div class="info-text">
+                            <div>Cd = <span id="dragCoeff-display">0,47</span> (formfaktor)</div>
+                            <div>ρ = <span id="rhoAir-display">1,225</span> kg/m³ (luft)</div>
+                            <div>A = <span id="area-display">43,0</span> cm² (areal)</div>
+                            <div>$k = $ <span id="kQuad-display">$1{,}23 \cdot 10^{-5}$</span></div>
+                        </div>
+
+                        <div id="formulasDrag" class="formulas" style="display: none;">
+                            <div class="formula-section">
+                                <div class="formula-title green-text">Differentialligninger:</div>
+                                <div class="formula-code">$\frac{d^2x}{dt^2} = -\frac{k}{m} \cdot |v| \cdot v_x$</div>
+                                <div class="formula-code">$\frac{d^2y}{dt^2} = -g - \frac{k}{m} \cdot |v| \cdot v_y$
+                                </div>
+                            </div>
+                            <div class="formula-section">
+                                <div class="formula-title green-text">Med $|v| = \sqrt{v_x^2 + v_y^2}$:</div>
+                                <div class="formula-code">$k = \frac{1}{2} \cdot C_d \cdot \rho \cdot A = $ <span
+                                        id="kQuad-formula">1,23*10^-5</span></div>
+                                <div class="formula-code">$\frac{d^2x}{dt^2} = -\frac{k}{m} \cdot \sqrt{v_x^2 + v_y^2}
+                                    \cdot v_x$</div>
+                                <div class="formula-code">$\frac{d^2y}{dt^2} = -g - \frac{k}{m} \cdot \sqrt{v_x^2 +
+                                    v_y^2} \cdot v_y$</div>
+                            </div>
+                            <div class="formula-section">
+                                <div class="formula-title green-text">Analytiske løsninger (approksimative):</div>
+                                <div class="formula-code">$T \approx \frac{v_{0y} + \sqrt{v_{0y}^2 + 2g \cdot \Delta
+                                    h}}{g}$</div>
+                                <div class="formula-code">$R \approx v_{0x} \cdot T - \frac{k}{2m} \cdot v_0^2 \cdot
+                                    T^2$</div>
+                                <div class="formula-code">$H \approx h_0 + \frac{v_{0y}^2}{2g} - \frac{k}{6m} \cdot
+                                    v_0^3 \cdot \sin(\theta)$</div>
+                                <div class="info-text" style="margin-top: 0.5rem; font-style: italic;">
+                                    <strong>Note:</strong> Disse formler er approksimative. Præcise løsninger kræver
+                                    numerisk integration.
+                                </div>
+                            </div>
+                            <div class="formula-section">
+                                <div class="formula-title green-text">Reynolds-tal:</div>
+                                <div>$Re = \frac{\rho v D}{\mu} \approx $ <span id="reynolds-formula">$1{,}23 \cdot
+                                        10^{5}$</span>
+                                </div>
+                                <div>For kugle: $C_d \approx 0{,}47$ ($Re > 10^3$)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="comparison-box">
+                    <h3>Sammenligning af resultater</h3>
+                    <div class="comparison-item">
+                        <div class="blue-text"><strong>Uden luftmodstand:</strong></div>
+                        <div>Rækkevidde: <span class="mono" id="R-compare">0,00</span> m</div>
+                    </div>
+                    <div class="comparison-item" id="dragComparison" style="display: none;">
+                        <div class="green-text"><strong>Med luftmodstand:</strong></div>
+                        <div>Rækkevidde: <span class="mono" id="R-drag">0,00</span> m</div>
+                        <div class="info-text">Reduktion: <span id="reduction">0,0</span>%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let v0 = 40;
+        let angleDeg = 40;
+        let mass = 0.145;
+        let g = 9.80665;
+        let startHeight = 0;
+        let targetHeight = 0;
+        let radius = 0.037;
+        let dragCoeff = 0.47;
+        let rhoAir = 1.225;
+        let dt = 0.005;
+        let tMax = 10;
+        let visUdenModstand = true;
+        let visKvadratiskNumerisk = true;
+        let visFormler = false;
+
+        // Calculated values
+        let vinkelRad, vx0, vy0, area, kQuadPhys, reynoldsNumber;
+        let T, R, H;
+        let results = {};
+
+        // DOM elements
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Helper function to format scientific notation in LaTeX
+        function formatScientific(num) {
+            if (num === 0) return '$0$';
+
+            const exp = Math.floor(Math.log10(Math.abs(num)));
+            const mantissa = num / Math.pow(10, exp);
+
+            if (exp === 0) {
+                return '$' + mantissa.toFixed(2).replace('.', '{,}') + '$';
+            } else if (exp > 0) {
+                return '$' + mantissa.toFixed(2).replace('.', '{,}') + ' \\cdot 10^{' + exp + '}$';
+            } else {
+                return '$' + mantissa.toFixed(2).replace('.', '{,}') + ' \\cdot 10^{' + exp + '}$';
+            }
+        }
+
+        // Helper function to format numbers with Danish decimal comma
+        function formatNumber(num, decimals = 2) {
+            if (isNaN(num) || !isFinite(num)) {
+                return 'NaN';
+            }
+            return num.toFixed(decimals).replace('.', ',');
+        }
+
+
+        // Initialize
+        function init() {
+            updateCalculatedValues();
+            setupEventListeners();
+            draw();
+        }
+
+        function updateCalculatedValues() {
+            vinkelRad = (angleDeg * Math.PI) / 180;
+            vx0 = v0 * Math.cos(vinkelRad);
+            vy0 = v0 * Math.sin(vinkelRad);
+            area = Math.PI * radius * radius;
+            kQuadPhys = 0.5 * dragCoeff * rhoAir * area;
+            reynoldsNumber = Math.abs((rhoAir * v0 * 2 * radius) / (1.8e-5));
+
+            const analyticalResults = beregnAnalytiskeResultater();
+            T = analyticalResults.T;
+            R = analyticalResults.R;
+            H = analyticalResults.H;
+        }
+
+        function beregnAnalytiskeResultater() {
+            const heightDiff = startHeight - targetHeight;
+            const discriminant = vy0 * vy0 + 2 * g * heightDiff;
+
+            if (discriminant < 0) {
+                return { T: 0, R: 0, H: startHeight };
+            }
+
+            // For targetHeight > startHeight, we need the projectile to reach the target height
+            let T_total;
+            if (targetHeight > startHeight) {
+                // Use the positive root to reach the higher target
+                T_total = Math.max(0, (vy0 + Math.sqrt(discriminant)) / g);
+            } else {
+                // Use the larger root for landing at lower height
+                T_total = Math.max(0, (vy0 + Math.sqrt(discriminant)) / g);
+            }
+
+            const R_total = Math.max(0, vx0 * T_total);
+            const H_max = startHeight + Math.max(0, (vy0 * vy0) / (2 * g));
+
+            return { T: T_total, R: R_total, H: H_max };
+        }
+
+        function simuleringKvadratiskModstand() {
+            const trajectories = [];
+            const energyData = [];
+            let t = 0;
+            let x = 0;
+            let y = startHeight;
+            let vx = vx0;
+            let vy = vy0;
+            let totalWorkDone = 0; // Total arbejde udført af luftmodstand
+
+            // Initial energi
+            const initialKinetic = 0.5 * mass * (vx0 * vx0 + vy0 * vy0);
+            const initialPotential = mass * g * startHeight;
+            const initialTotalEnergy = initialKinetic + initialPotential;
+
+            trajectories.push({ t: 0, x: 0, y: startHeight, vx, vy });
+            energyData.push({ 
+                t: 0, 
+                kinetic: initialKinetic, 
+                potential: initialPotential, 
+                total: initialTotalEnergy,
+                workDone: 0,
+                power: 0
+            });
+
+            // Different stopping conditions based on target height
+            if (targetHeight <= startHeight) {
+                // Target is at or below start height - stop when projectile reaches target
+                while (y >= targetHeight && t < tMax && trajectories.length < 10000) {
+                    const v = Math.sqrt(vx * vx + vy * vy);
+                    const Fx = -kQuadPhys * v * vx / mass;
+                    const Fy = -g - (kQuadPhys * v * vy) / mass;
+
+                    // Beregn effekt (power) fra luftmodstand
+                    const dragForce = kQuadPhys * v * v;
+                    const power = dragForce * v; // P = F * v
+                    const workThisStep = power * dt;
+                    totalWorkDone += workThisStep;
+
+                    vx += Fx * dt;
+                    vy += Fy * dt;
+                    x += vx * dt;
+                    y += vy * dt;
+                    t += dt;
+
+                    if (y >= targetHeight) {
+                        trajectories.push({ t, x, y, vx, vy });
+                        
+                        // Beregn nuværende energi
+                        const currentKinetic = 0.5 * mass * (vx * vx + vy * vy);
+                        const currentPotential = mass * g * y;
+                        const currentTotalEnergy = currentKinetic + currentPotential;
+                        
+                        energyData.push({ 
+                            t, 
+                            kinetic: currentKinetic, 
+                            potential: currentPotential, 
+                            total: currentTotalEnergy,
+                            workDone: totalWorkDone,
+                            power: power
+                        });
+                    }
+                }
+            } else {
+                // Target is above start height - stop when projectile reaches target height
+                while (y <= targetHeight && t < tMax && trajectories.length < 10000) {
+                    const v = Math.sqrt(vx * vx + vy * vy);
+                    const Fx = -kQuadPhys * v * vx / mass;
+                    const Fy = -g - (kQuadPhys * v * vy) / mass;
+
+                    // Beregn effekt (power) fra luftmodstand
+                    const dragForce = kQuadPhys * v * v;
+                    const power = dragForce * v; // P = F * v
+                    const workThisStep = power * dt;
+                    totalWorkDone += workThisStep;
+
+                    vx += Fx * dt;
+                    vy += Fy * dt;
+                    x += vx * dt;
+                    y += vy * dt;
+                    t += dt;
+
+                    trajectories.push({ t, x, y, vx, vy });
+                    
+                    // Beregn nuværende energi
+                    const currentKinetic = 0.5 * mass * (vx * vx + vy * vy);
+                    const currentPotential = mass * g * y;
+                    const currentTotalEnergy = currentKinetic + currentPotential;
+                    
+                    energyData.push({ 
+                        t, 
+                        kinetic: currentKinetic, 
+                        potential: currentPotential, 
+                        total: currentTotalEnergy,
+                        workDone: totalWorkDone,
+                        power: power
+                    });
+                }
+            }
+
+            return { trajectories, energyData, initialTotalEnergy, totalWorkDone };
+        }
+
+        function beregnIdealTrajectory() {
+            const trajectories = [];
+            const heightDiff = startHeight - targetHeight;
+            const discriminant = vy0 * vy0 + 2 * g * heightDiff;
+
+            if (discriminant < 0) {
+                return [{ t: 0, x: 0, y: startHeight }];
+            }
+
+            const T_total = (vy0 + Math.sqrt(discriminant)) / g;
+
+            for (let t = 0; t <= T_total; t += dt) {
+                const x = vx0 * t;
+                const y = startHeight + vy0 * t - 0.5 * g * t * t;
+
+                // Different stopping conditions based on target height
+                if (targetHeight <= startHeight) {
+                    // Target is at or below start height - stop when projectile goes below target
+                    if (y < targetHeight && t > 0) break;
+                } else {
+                    // Target is above start height - stop when projectile reaches target height
+                    if (y >= targetHeight && t > 0) break;
+                }
+
+                trajectories.push({ t, x, y });
+            }
+
+            return trajectories;
+        }
+
+        function draw() {
+            const rect = canvas.getBoundingClientRect();
+            const width = rect.width;
+            const height = rect.height;
+
+            canvas.width = width;
+            canvas.height = height;
+
+            ctx.clearRect(0, 0, width, height);
+
+            const idealTraj = visUdenModstand ? beregnIdealTrajectory() : [];
+            const quadratiskResult = visKvadratiskNumerisk ? simuleringKvadratiskModstand() : null;
+            const quadratisk = quadratiskResult ? quadratiskResult.trajectories : [];
+
+            const allTrajs = [...idealTraj, ...quadratisk];
+            if (allTrajs.length === 0) return;
+
+            const maxX = Math.max(...allTrajs.map(p => p.x), R, 10);
+            const allYValues = allTrajs.map(p => p.y);
+            const minY = Math.min(startHeight, targetHeight, ...allYValues) - 5;
+            const maxY = Math.max(startHeight, targetHeight, H, ...allYValues) + 5;
+
+            const margin = 40;
+            const plotWidth = width - 2 * margin;
+            const plotHeight = height - 2 * margin;
+            const yRange = maxY - minY;
+
+            const scaleX = plotWidth / maxX;
+            const scaleY = plotHeight / yRange;
+
+            function toCanvas(x, y) {
+                return [
+                    margin + x * scaleX,
+                    height - margin - (y - minY) * scaleY
+                ];
+            }
+
+            // Draw grid first (background)
+            ctx.strokeStyle = "#e0e0e0";
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+
+            for (let i = 0; i <= 10; i++) {
+                const x = margin + (i / 10) * plotWidth;
+                ctx.beginPath();
+                ctx.moveTo(x, margin);
+                ctx.lineTo(x, height - margin);
+                ctx.stroke();
+            }
+
+            for (let i = 0; i <= 10; i++) {
+                const y = margin + (i / 10) * plotHeight;
+                ctx.beginPath();
+                ctx.moveTo(margin, y);
+                ctx.lineTo(width - margin, y);
+                ctx.stroke();
+            }
+
+            ctx.setLineDash([]);
+
+            // Draw axes (foreground)
+            ctx.strokeStyle = "#333";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(margin, height - margin);
+            ctx.lineTo(width - margin, height - margin);
+            ctx.moveTo(margin, height - margin);
+            ctx.lineTo(margin, margin);
+            ctx.stroke();
+
+            // Draw start and end height lines
+            ctx.strokeStyle = "#666";
+            ctx.lineWidth = 2;
+            ctx.setLineDash([10, 5]);
+
+            const [x1, y1] = toCanvas(0, startHeight);
+            const [x2, y2] = toCanvas(maxX, startHeight);
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+
+            const [x3, y3] = toCanvas(0, targetHeight);
+            const [x4, y4] = toCanvas(maxX, targetHeight);
+            ctx.beginPath();
+            ctx.moveTo(x3, y3);
+            ctx.lineTo(x4, y4);
+            ctx.stroke();
+
+            ctx.setLineDash([]);
+
+            function drawTrajectory(traj, color, lineWidth = 2, lineDash = []) {
+                if (traj.length < 2) return;
+
+                ctx.strokeStyle = color;
+                ctx.lineWidth = lineWidth;
+                ctx.setLineDash(lineDash);
+                ctx.beginPath();
+
+                const [x0, y0] = toCanvas(traj[0].x, traj[0].y);
+                ctx.moveTo(x0, y0);
+
+                for (let i = 1; i < traj.length; i++) {
+                    const [x, y] = toCanvas(traj[i].x, traj[i].y);
+                    ctx.lineTo(x, y);
+                }
+
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            if (visUdenModstand) {
+                drawTrajectory(idealTraj, "#2563eb", 3);
+            }
+
+            if (visKvadratiskNumerisk) {
+                drawTrajectory(quadratisk, "#16a34a", 3);
+            }
+
+            // Axis labels
+            ctx.fillStyle = "#333";
+            ctx.font = "14px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText("Afstand (m)", width / 2, height - 10);
+
+            ctx.save();
+            ctx.translate(15, height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText("Højde (m)", 0, 0);
+            ctx.restore();
+
+            // Calculate nice intervals (divisible by 2 or 5)
+            function calculateNiceInterval(range, numTicks) {
+                const roughInterval = range / numTicks;
+                const magnitude = Math.pow(10, Math.floor(Math.log10(roughInterval)));
+                const normalizedInterval = roughInterval / magnitude;
+
+                let niceInterval;
+                if (normalizedInterval <= 1) {
+                    niceInterval = 1;
+                } else if (normalizedInterval <= 2) {
+                    niceInterval = 2;
+                } else if (normalizedInterval <= 5) {
+                    niceInterval = 5;
+                } else {
+                    niceInterval = 10;
+                }
+
+                return niceInterval * magnitude;
+            }
+
+            const xInterval = calculateNiceInterval(maxX, 8);
+            const yInterval = calculateNiceInterval(yRange, 8);
+
+            const xStart = Math.floor(0 / xInterval) * xInterval;
+            const xEnd = Math.ceil(maxX / xInterval) * xInterval;
+            const yStart = Math.floor(minY / yInterval) * yInterval;
+            const yEnd = Math.ceil(maxY / yInterval) * yInterval;
+
+            // Scale
+            ctx.font = "12px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "top";
+
+            // X-axis labels
+            for (let x = xStart; x <= xEnd; x += xInterval) {
+                if (x >= 0 && x <= maxX) {
+                    const xPos = margin + (x / maxX) * plotWidth;
+                    ctx.fillText(Math.round(x), xPos, height - margin + 5);
+                }
+            }
+
+            ctx.textAlign = "right";
+            ctx.textBaseline = "middle";
+
+            // Y-axis labels
+            for (let y = yStart; y <= yEnd; y += yInterval) {
+                if (y >= minY && y <= maxY) {
+                    const yPos = height - margin - ((y - minY) / yRange) * plotHeight;
+                    ctx.fillText(Math.round(y), margin - 5, yPos);
+                }
+            }
+
+            // Store results
+            results = {
+                ideal: idealTraj.length > 0 ? idealTraj[idealTraj.length - 1] : null,
+                quadratisk: quadratisk.length > 0 ? quadratisk[quadratisk.length - 1] : null
+            };
+
+            // Draw energy graph if enabled
+            if (quadratiskResult && quadratiskResult.energyData) {
+                drawEnergyGraph(quadratiskResult.energyData, quadratiskResult.initialTotalEnergy, quadratiskResult.totalWorkDone);
+            }
+
+            updateDisplay();
+        }
+
+        function drawEnergyGraph(energyData, initialTotalEnergy, totalWorkDone) {
+            const energyCanvas = document.getElementById('energyCanvas');
+            const energyCtx = energyCanvas.getContext('2d');
+            const rect = energyCanvas.getBoundingClientRect();
+            const width = rect.width;
+            const height = rect.height;
+
+            energyCanvas.width = width;
+            energyCanvas.height = height;
+
+            energyCtx.clearRect(0, 0, width, height);
+
+            if (energyData.length === 0) return;
+
+            const margin = 50;
+            const plotWidth = width - 2 * margin;
+            const plotHeight = height - 2 * margin;
+
+            // Find data ranges
+            const maxTime = Math.max(...energyData.map(d => d.t));
+            const maxEnergy = Math.max(...energyData.map(d => d.total), initialTotalEnergy);
+            const maxPower = Math.max(...energyData.map(d => d.power));
+            const maxWork = Math.max(...energyData.map(d => d.workDone), totalWorkDone);
+
+            const scaleX = plotWidth / maxTime;
+            const scaleY = plotHeight / maxEnergy;
+            const scalePower = plotHeight / maxPower;
+            const scaleWork = plotHeight / maxWork;
+
+            function toEnergyCanvas(x, y) {
+                return [
+                    margin + x * scaleX,
+                    height - margin - y * scaleY
+                ];
+            }
+
+            function toPowerCanvas(x, y) {
+                return [
+                    margin + x * scaleX,
+                    height - margin - y * scalePower
+                ];
+            }
+
+            // Draw grid
+            energyCtx.strokeStyle = "#e0e0e0";
+            energyCtx.lineWidth = 1;
+            energyCtx.setLineDash([5, 5]);
+
+            for (let i = 0; i <= 10; i++) {
+                const x = margin + (i / 10) * plotWidth;
+                energyCtx.beginPath();
+                energyCtx.moveTo(x, margin);
+                energyCtx.lineTo(x, height - margin);
+                energyCtx.stroke();
+            }
+
+            for (let i = 0; i <= 10; i++) {
+                const y = margin + (i / 10) * plotHeight;
+                energyCtx.beginPath();
+                energyCtx.moveTo(margin, y);
+                energyCtx.lineTo(width - margin, y);
+                energyCtx.stroke();
+            }
+
+            energyCtx.setLineDash([]);
+
+            // Draw axes
+            energyCtx.strokeStyle = "#333";
+            energyCtx.lineWidth = 2;
+            energyCtx.beginPath();
+            energyCtx.moveTo(margin, height - margin);
+            energyCtx.lineTo(width - margin, height - margin);
+            energyCtx.moveTo(margin, height - margin);
+            energyCtx.lineTo(margin, margin);
+            energyCtx.stroke();
+
+            // Draw energy curves
+            if (energyData.length > 1) {
+                // Total energy
+                energyCtx.strokeStyle = "#dc2626";
+                energyCtx.lineWidth = 3;
+                energyCtx.beginPath();
+                const [x0, y0] = toEnergyCanvas(energyData[0].t, energyData[0].total);
+                energyCtx.moveTo(x0, y0);
+                for (let i = 1; i < energyData.length; i++) {
+                    const [x, y] = toEnergyCanvas(energyData[i].t, energyData[i].total);
+                    energyCtx.lineTo(x, y);
+                }
+                energyCtx.stroke();
+
+                // Kinetic energy
+                energyCtx.strokeStyle = "#2563eb";
+                energyCtx.lineWidth = 2;
+                energyCtx.beginPath();
+                const [x0k, y0k] = toEnergyCanvas(energyData[0].t, energyData[0].kinetic);
+                energyCtx.moveTo(x0k, y0k);
+                for (let i = 1; i < energyData.length; i++) {
+                    const [x, y] = toEnergyCanvas(energyData[i].t, energyData[i].kinetic);
+                    energyCtx.lineTo(x, y);
+                }
+                energyCtx.stroke();
+
+                // Potential energy
+                energyCtx.strokeStyle = "#16a34a";
+                energyCtx.lineWidth = 2;
+                energyCtx.beginPath();
+                const [x0p, y0p] = toEnergyCanvas(energyData[0].t, energyData[0].potential);
+                energyCtx.moveTo(x0p, y0p);
+                for (let i = 1; i < energyData.length; i++) {
+                    const [x, y] = toEnergyCanvas(energyData[i].t, energyData[i].potential);
+                    energyCtx.lineTo(x, y);
+                }
+                energyCtx.stroke();
+
+                // Work done by drag (dashed line)
+                energyCtx.strokeStyle = "#f59e0b";
+                energyCtx.lineWidth = 2;
+                energyCtx.setLineDash([10, 5]);
+                energyCtx.beginPath();
+                const [x0w, y0w] = toEnergyCanvas(energyData[0].t, energyData[0].workDone);
+                energyCtx.moveTo(x0w, y0w);
+                for (let i = 1; i < energyData.length; i++) {
+                    const [x, y] = toEnergyCanvas(energyData[i].t, energyData[i].workDone);
+                    energyCtx.lineTo(x, y);
+                }
+                energyCtx.stroke();
+                energyCtx.setLineDash([]);
+            }
+
+            // Axis labels
+            energyCtx.fillStyle = "#333";
+            energyCtx.font = "14px Arial";
+            energyCtx.textAlign = "center";
+            energyCtx.fillText("Tid (s)", width / 2, height - 10);
+
+            energyCtx.save();
+            energyCtx.translate(15, height / 2);
+            energyCtx.rotate(-Math.PI / 2);
+            energyCtx.fillText("Energi (J)", 0, 0);
+            energyCtx.restore();
+
+            // Legend
+            const legendY = 20;
+            const legendItems = [
+                { color: "#dc2626", label: "Total energi" },
+                { color: "#2563eb", label: "Kinetisk energi" },
+                { color: "#16a34a", label: "Potentiel energi" },
+                { color: "#f59e0b", label: "Arbejde fra luftmodstand" }
+            ];
+
+            energyCtx.font = "12px Arial";
+            energyCtx.textAlign = "left";
+            legendItems.forEach((item, index) => {
+                const x = width - 200;
+                const y = legendY + index * 20;
+                
+                energyCtx.fillStyle = item.color;
+                energyCtx.fillRect(x, y - 8, 15, 3);
+                if (item.label === "Arbejde fra luftmodstand") {
+                    energyCtx.setLineDash([5, 5]);
+                    energyCtx.strokeRect(x, y - 8, 15, 3);
+                    energyCtx.setLineDash([]);
+                }
+                
+                energyCtx.fillStyle = "#333";
+                energyCtx.fillText(item.label, x + 20, y);
+            });
+
+            // Energy balance text
+            const energyLoss = initialTotalEnergy - (energyData.length > 0 ? energyData[energyData.length - 1].total : 0);
+            const efficiency = energyData.length > 0 ? ((energyData[energyData.length - 1].total / initialTotalEnergy) * 100) : 100;
+            
+            energyCtx.fillStyle = "#333";
+            energyCtx.font = "12px Arial";
+            energyCtx.textAlign = "left";
+            energyCtx.fillText(`Initial energi: ${formatNumber(initialTotalEnergy, 1)} J`, 20, 20);
+            energyCtx.fillText(`Energitab: ${formatNumber(energyLoss, 1)} J`, 20, 40);
+            energyCtx.fillText(`Effektivitet: ${formatNumber(efficiency, 1)}%`, 20, 60);
+            energyCtx.fillText(`Total arbejde fra luftmodstand: ${formatNumber(totalWorkDone, 1)} J`, 20, 80);
+        }
+
+        function updateDisplay() {
+            // Update all value displays
+            document.getElementById('v0-value').textContent = formatNumber(v0, 1);
+            document.getElementById('angle-value').textContent = formatNumber(angleDeg, 1);
+            document.getElementById('mass-value').textContent = formatNumber(mass, 3);
+            document.getElementById('startHeight-value').textContent = formatNumber(startHeight, 1);
+            document.getElementById('targetHeight-value').textContent = formatNumber(targetHeight, 1);
+            document.getElementById('heightDiff').textContent = formatNumber(startHeight - targetHeight, 1);
+            document.getElementById('radius-value').textContent = formatNumber(radius * 1000, 1);
+            document.getElementById('area-value').textContent = formatNumber(area * 10000, 1);
+            document.getElementById('dragCoeff-value').textContent = formatNumber(dragCoeff, 2);
+            document.getElementById('rhoAir-value').textContent = formatNumber(rhoAir, 3);
+            document.getElementById('dt-value').textContent = formatNumber(dt, 4);
+
+            // Calculate and update results
+            const analyticalResults = beregnAnalytiskeResultater();
+            T = analyticalResults.T;
+            R = analyticalResults.R;
+            H = analyticalResults.H;
+
+            document.getElementById('T-value').textContent = formatNumber(T, 2);
+            document.getElementById('R-value').textContent = formatNumber(R, 2);
+            document.getElementById('H-value').textContent = formatNumber(H, 2);
+            document.getElementById('start-display').textContent = startHeight;
+            document.getElementById('target-display').textContent = targetHeight;
+            document.getElementById('deltaH').textContent = formatNumber(startHeight - targetHeight, 1);
+
+            // Update drag results
+            document.getElementById('dragCoeff-display').textContent = formatNumber(dragCoeff, 2);
+            document.getElementById('rhoAir-display').textContent = formatNumber(rhoAir, 3);
+            document.getElementById('area-display').textContent = formatNumber(area * 10000, 1);
+            document.getElementById('kQuad-display').textContent = formatScientific(kQuadPhys);
+            document.getElementById('kQuad-formula').textContent = formatScientific(kQuadPhys);
+            document.getElementById('reynolds-formula').textContent = formatScientific(reynoldsNumber);
+
+            // Update calculation display
+            updateCalculationDisplay();
+
+            // Update square opacity
+            updateSquareOpacity('toggleUdenModstand', visUdenModstand);
+            updateSquareOpacity('toggleKvadratiskNumerisk', visKvadratiskNumerisk);
+
+            // Update comparison
+            document.getElementById('R-compare').textContent = formatNumber(R, 2);
+
+            if (results.quadratisk) {
+                document.getElementById('R-drag').textContent = formatNumber(results.quadratisk.x, 2);
+                const reduction = ((R - results.quadratisk.x) / R * 100).toFixed(1);
+                document.getElementById('reduction').textContent = reduction.replace('.', ',');
+                document.getElementById('dragComparison').style.display = 'block';
+            } else {
+                document.getElementById('dragComparison').style.display = 'none';
+            }
+
+            // Update MathJax if it's loaded
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise();
+            }
+
+        }
+
+        function updateCalculationDisplay() {
+            // Calculate velocity components
+            const angleRad = (angleDeg * Math.PI) / 180;
+            const vx0 = v0 * Math.cos(angleRad);
+            const vy0 = v0 * Math.sin(angleRad);
+            const deltaH = startHeight - targetHeight;
+
+            // Calculate time using analytical formula
+            const discriminant = vy0 * vy0 + 2 * g * deltaH;
+            let T_calc;
+            if (discriminant < 0) {
+                T_calc = 0;
+            } else {
+                T_calc = (vy0 + Math.sqrt(discriminant)) / g;
+            }
+
+            const R_calc = vx0 * T_calc;
+            const H_calc = startHeight + (vy0 * vy0) / (2 * g);
+
+            // Update calculation display
+            document.getElementById('calc-v0').textContent = formatNumber(v0, 1);
+            document.getElementById('calc-angle').textContent = formatNumber(angleDeg, 1);
+            document.getElementById('calc-v0x').textContent = formatNumber(vx0, 1);
+            document.getElementById('calc-v0y').textContent = formatNumber(vy0, 1);
+            document.getElementById('calc-deltaH').textContent = formatNumber(deltaH, 1);
+            document.getElementById('calc-T').textContent = formatNumber(T_calc, 2);
+            document.getElementById('calc-R').textContent = formatNumber(R_calc, 1);
+            document.getElementById('calc-H').textContent = formatNumber(H_calc, 1);
+        }
+
+        function updateSquareOpacity(squareId, isActive) {
+            const square = document.getElementById(squareId);
+            if (isActive) {
+                square.style.opacity = '1';
+            } else {
+                square.style.opacity = '0.3';
+            }
+        }
+
+        function setupEventListeners() {
+            // Range inputs
+            document.getElementById('v0').addEventListener('input', (e) => {
+                v0 = Number(e.target.value);
+                updateCalculatedValues();
+                draw();
+            });
+
+            document.getElementById('angle').addEventListener('input', (e) => {
+                angleDeg = Number(e.target.value);
+                updateCalculatedValues();
+                draw();
+            });
+
+            document.getElementById('mass').addEventListener('input', (e) => {
+                mass = Number(e.target.value);
+                updateCalculatedValues();
+                draw();
+            });
+
+            document.getElementById('startHeight').addEventListener('input', (e) => {
+                startHeight = Number(e.target.value);
+                updateCalculatedValues();
+                draw();
+            });
+
+            document.getElementById('targetHeight').addEventListener('input', (e) => {
+                targetHeight = Number(e.target.value);
+                updateCalculatedValues();
+                draw();
+            });
+
+            document.getElementById('radius').addEventListener('input', (e) => {
+                radius = Number(e.target.value);
+                updateCalculatedValues();
+                draw();
+            });
+
+            document.getElementById('dragCoeff').addEventListener('input', (e) => {
+                dragCoeff = Number(e.target.value);
+                updateCalculatedValues();
+                draw();
+            });
+
+            document.getElementById('rhoAir').addEventListener('input', (e) => {
+                rhoAir = Number(e.target.value);
+                updateCalculatedValues();
+                draw();
+            });
+
+            document.getElementById('dt').addEventListener('input', (e) => {
+                dt = Number(e.target.value);
+                draw();
+            });
+
+            // Checkboxes (hidden, controlled by colored squares)
+            document.getElementById('visUdenModstand').addEventListener('change', (e) => {
+                visUdenModstand = e.target.checked;
+                draw();
+            });
+
+            document.getElementById('visKvadratiskNumerisk').addEventListener('change', (e) => {
+                visKvadratiskNumerisk = e.target.checked;
+                draw();
+            });
+
+            // Clickable colored squares
+            document.getElementById('toggleUdenModstand').addEventListener('click', () => {
+                const checkbox = document.getElementById('visUdenModstand');
+                checkbox.checked = !checkbox.checked;
+                visUdenModstand = checkbox.checked;
+                updateSquareOpacity('toggleUdenModstand', checkbox.checked);
+                draw();
+            });
+
+            document.getElementById('toggleKvadratiskNumerisk').addEventListener('click', () => {
+                const checkbox = document.getElementById('visKvadratiskNumerisk');
+                checkbox.checked = !checkbox.checked;
+                visKvadratiskNumerisk = checkbox.checked;
+                updateSquareOpacity('toggleKvadratiskNumerisk', checkbox.checked);
+                draw();
+            });
+
+            // Formula toggle
+            document.getElementById('toggleFormulas').addEventListener('click', () => {
+                visFormler = !visFormler;
+                const formulas = document.getElementById('formulas');
+                const formulasDrag = document.getElementById('formulasDrag');
+                const button = document.getElementById('toggleFormulas');
+
+                if (visFormler) {
+                    formulas.style.display = 'block';
+                    formulasDrag.style.display = 'block';
+                    button.textContent = 'Skjul ligninger';
+                } else {
+                    formulas.style.display = 'none';
+                    formulasDrag.style.display = 'none';
+                    button.textContent = 'Vis ligninger';
+                }
+            });
+
+            // Energy graph toggle
+            document.getElementById('toggleEnergyGraph').addEventListener('click', () => {
+                const container = document.getElementById('energyCanvasContainer');
+                const button = document.getElementById('toggleEnergyGraph');
+                
+                if (container.style.display === 'none') {
+                    container.style.display = 'block';
+                    button.textContent = 'Skjul energianalyse';
+                } else {
+                    container.style.display = 'none';
+                    button.textContent = 'Vis energianalyse';
+                }
+            });
+
+            // Window resize
+            window.addEventListener('resize', () => {
+                setTimeout(draw, 100);
+            });
+        }
+
+        // Start the application
+        init();
+    </script>
+</body>
+
+</html>
