@@ -1,0 +1,1901 @@
+<!DOCTYPE html>
+<html lang="da">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fysik formelsamling – Energi og kinematik (komplet, fold-ud)</title>
+
+    <!-- VERSIONERING -->
+    <!-- Version: 2.0 - Kinematik + Multi-word søgning -->
+    <!-- Dato: 2024 -->
+    <!-- Ændringer: -->
+    <!-- - Tilføjet 1D kinematik (5 formler) -->
+    <!-- - Tilføjet 2D kinematik/projektils bevægelse (7 formler) -->
+    <!-- - SVG figur for projektils bevægelse -->
+    <!-- - Multi-word søgefunktion (søger på alle ord) -->
+    <!-- - Prioriteret søgning (overskrifter først) -->
+    <!-- - Enheder i alle mellemregninger -->
+    <!-- - Browser-kompatibel JavaScript -->
+
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        body {
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", Arial;
+            background: #eef2ff;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            margin: 0 0 12px
+        }
+
+        h2 {
+            margin: 18px 0 8px
+        }
+
+        p {
+            margin: 8px 0
+        }
+
+        .formula {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin: 8px 10px;
+            background: #fff;
+        }
+
+        summary {
+            padding: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            background: #f3f4f6;
+        }
+
+        .panel {
+            padding: 12px;
+            border-top: 1px solid #ddd;
+        }
+
+        .example {
+            background: #f9fafb;
+            border-left: 4px solid #3498db;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .remember {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .remember:hover {
+            background: #ffeaa7;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .remember.editing {
+            background: #fff;
+            border: 2px solid #ffc107;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .remember textarea {
+            width: 100%;
+            min-height: 60px;
+            border: none;
+            background: transparent;
+            font-family: inherit;
+            font-size: inherit;
+            resize: vertical;
+            outline: none;
+        }
+
+        .remember .edit-hint {
+            font-size: 12px;
+            color: #666;
+            font-style: italic;
+            margin-top: 5px;
+        }
+
+        .symbols {
+            background: #f0f9ff;
+            border-left: 4px solid #0ea5e9;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+
+        .symbols ul {
+            margin: 5px 0;
+            padding-left: 20px;
+        }
+
+        .symbols li {
+            margin: 3px 0;
+        }
+
+
+
+        .lead {
+            color: #4b5563
+        }
+
+        .section {
+            margin-top: 24px
+        }
+
+        .section-wrap {
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            background: #fff;
+            margin: 16px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .05)
+        }
+
+        .section-wrap>summary {
+            background: #e2e8f0;
+            border-bottom: 1px solid #cbd5e1;
+            padding: 10px 12px;
+            cursor: pointer
+        }
+
+        .section-wrap[open]>summary {
+            background: #dbeafe
+        }
+
+        .section-wrap summary h2 {
+            margin: 0
+        }
+
+        /* Search functionality styles */
+        .search-container {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-description {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .search-input {
+            width: 100%;
+            max-width: 500px;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+            background: #ffffff;
+            color: #2d3748;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3498db;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .search-input::placeholder {
+            color: #a0aec0;
+            font-style: italic;
+        }
+
+        .search-results {
+            margin-top: 12px;
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .search-highlight {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #2d3748;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-shadow: none;
+        }
+
+        .formula.hidden {
+            display: none;
+        }
+
+        .section-wrap.hidden {
+            display: none;
+        }
+
+        .section-wrap.has-results {
+            border-color: #667eea;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+            transition: all 0.3s ease;
+        }
+
+        .clear-search {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .clear-search:hover {
+            background: #2980b9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .no-results {
+            text-align: center;
+            color: #64748b;
+            font-style: italic;
+            padding: 20px;
+        }
+
+        /* Enhanced formula styling */
+        .formula.has-results {
+            border-color: #667eea;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+            transform: translateY(-1px);
+            transition: all 0.3s ease;
+        }
+
+        .formula.has-results summary {
+            background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%);
+            border-left: 4px solid #667eea;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Search Container -->
+    <div class="search-container">
+        <div class="search-description">
+            <strong>Søg i formelsamlingen:</strong> Find formler ved at søge på navn, beskrivelse eller variabler.
+            Du kan ikke søge på symboler - kun på tekst. Du kan folde menuer ind og ud.
+
+        </div>
+        <input type="text" id="searchInput" class="search-input"
+            placeholder="Søg i formler, beskrivelser og eksempler..." />
+        <div class="search-results" id="searchResults"></div>
+        <button class="clear-search" id="clearSearch" style="display: none;">Ryd søgning</button>
+
+        <!-- Credit - diskret placeret under søgning -->
+        <div style="text-align: center; margin-top: 0.5rem; color: #999; font-size: 0.75rem;">
+            Philip Kruse Jakobsen • <a href="mailto:pj@sg.dk" style="color: #999;">pj@sg.dk</a>
+        </div>
+    </div>
+
+    <h1>Fysik on Note – formelsamling (energi og kinematik)</h1>
+    <p class="lead">Notation: variabler i <em>kursiv</em> (fx $m, v, h$), konstanter og enheder i normal skrift (fx
+        $\mathrm{g},\,\mathrm{J},\,\mathrm{kg}$). Decimaler med komma. Multiplikation vises med $\cdot$.</p>
+
+    <!-- Version info -->
+    <div
+        style="background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; padding: 12px; margin: 16px 0; font-size: 14px;">
+        <strong>Version 2.0</strong> - Kinematik + Multi-word søgning<br>
+        <em>Nyheder:</em> 1D & 2D kinematik, projektils bevægelse, forbedret søgning, enheder i mellemregninger
+    </div>
+
+    <!-- MEKANISK ENERGI -->
+    <details class="section-wrap" open>
+        <summary>
+            <h2 class="section">Mekanisk energi</h2>
+        </summary>
+
+        <details class="formula" id="f-kinetisk">
+            <summary>Kinetisk energi: $E_{\mathrm{kin}} = \tfrac{1}{2} \cdot m \cdot v^{2}$</summary>
+            <div class="panel">
+                <p class="lead">Energien et legeme har pga. sin fart.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$E_{\mathrm{kin}}$ - kinetisk energi (Joule, J)</li>
+                        <li>$m$ - masse (kilogram, kg)</li>
+                        <li>$v$ - fart (meter per sekund, m/s)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel:</strong>
+                    <p>En klods: $m=2,00\,\mathrm{kg}$, $v=3,24\,\mathrm{m/s}$</p>
+                    <p>$E_{\mathrm{kin}} = \tfrac{1}{2} \cdot m \cdot v^{2}$</p>
+                    <p>$E_{\mathrm{kin}} = \tfrac{1}{2} \cdot
+                        2,00\,\mathrm{kg} \cdot \left(3,24\,\mathrm{m/s}\right)^{2} = 10,5\,\mathrm{J}$
+                    </p>
+                </div>
+                <div class="remember">
+                    <strong>Husk:</strong>
+                    <p contenteditable="true" data-formula-id="f-kinetisk">Kinetisk energi er altid positiv. Hastigheden
+                        er i anden, så negative hastigheder giver også
+                        positiv energi.</p>
+                    <div class="edit-hint">Klik for at redigere</div>
+                </div>
+            </div>
+        </details>
+
+        <details class="formula" id="f-mgh">
+            <summary>Potentiel energi (nær Jorden): $E_{\mathrm{p}} = m \cdot \mathrm{g} \cdot h$
+            </summary>
+            <div class="panel">
+                <p class="lead">Arbejdet der skal til for at løfte et legeme i Jordens tyngdefelt.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$E_{\mathrm{p}}$ - potentiel energi (Joule, J)</li>
+                        <li>$m$ - masse (kilogram, kg)</li>
+                        <li>$\mathrm{g}$ - tyngdeacceleration (meter per sekund i anden, m/s²)</li>
+                        <li>$h$ - højde (meter, m)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel:</strong>
+                    <p>Bold: $m=0,50\,\mathrm{kg}$, $h=2,0\,\mathrm{m}$,
+                        $\mathrm{g}=9,82\,\mathrm{m/s^2}$</p>
+                    <p>$E_{\mathrm{p}} = m \cdot \mathrm{g} \cdot h$</p>
+                    <p>$E_{\mathrm{p}} = 0,50\,\mathrm{kg} \cdot 9,82\,\mathrm{m/s^2} \cdot
+                        2,0\,\mathrm{m} = 9,82\,\mathrm{J}$</p>
+                </div>
+            </div>
+        </details>
+
+        <details class="formula" id="f-grav">
+            <summary>Gravitationspotentiel (punktmasser): $E_{\mathrm{p}} = -\dfrac{\mathrm{G} \cdot M \cdot m}{r}$
+            </summary>
+            <div class="panel">
+                <p class="lead">Gælder for to punktmasser med afstand $r$.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$E_{\mathrm{p}}$ - gravitationspotentiel energi (Joule, J)</li>
+                        <li>$\mathrm{G}$ - gravitationskonstant (Newton gange meter i anden per kilogram i anden,
+                            N⋅m²/kg²)</li>
+                        <li>$M$ - masse af det første legeme (kilogram, kg)</li>
+                        <li>$m$ - masse af det andet legeme (kilogram, kg)</li>
+                        <li>$r$ - afstand mellem legemernes tyngdepunkter (meter, m)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel (ved Jordens overflade):</strong>
+                    <p>$\mathrm{G}=6,674\times 10^{-11}\,\mathrm{N\,m^{2}\,kg^{-2}}$,
+                        $M=5,97\times10^{24}\,\mathrm{kg}$, $m=1,00\,\mathrm{kg}$,
+                        $r=6,37\times10^{6}\,\mathrm{m}$</p>
+                    <p>$E_{\mathrm{p}} = -\dfrac{\mathrm{G} \cdot M \cdot m}{r} \approx -6,25\times
+                        10^{7}\,\mathrm{J}$</p>
+                </div>
+            </div>
+        </details>
+
+        <details class="formula" id="f-fjeder">
+            <summary>Elastisk energi (fjeder): $E = \tfrac{1}{2} \cdot k \cdot x^{2}$</summary>
+            <div class="panel">
+                <p class="lead">Energi lagret ved deformation (Hookes lov).</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$E$ - elastisk energi (Joule, J)</li>
+                        <li>$k$ - fjederkonstant (Newton per meter, N/m)</li>
+                        <li>$x$ - deformation fra ligevægtsposition (meter, m)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel:</strong>
+                    <p>$k=200\,\mathrm{N/m}$, $x=0,10\,\mathrm{m}$</p>
+                    <p>$E = \tfrac{1}{2} \cdot 200\,\mathrm{N/m}\cdot (0,10\,\mathrm{m})^{2} =
+                        1,00\,\mathrm{J}$</p>
+                </div>
+            </div>
+        </details>
+
+        <details class="formula" id="f-rot">
+            <summary>Rotationsenergi: $E = \tfrac{1}{2} \cdot I \cdot \omega^{2}$</summary>
+            <div class="panel">
+                <p class="lead">Kinetisk energi knyttet til rotation om en akse.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$E$ - rotationsenergi (Joule, J)</li>
+                        <li>$I$ - inertimoment (kilogram gange meter i anden, kg⋅m²)</li>
+                        <li>$\omega$ - vinkelhastighed (radian per sekund, rad/s)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel:</strong>
+                    <p>$I=0,20\,\mathrm{kg\,m^{2}}$, $\omega=10,0\,\mathrm{rad/s}$</p>
+                    <p>$E = \tfrac{1}{2}\cdot 0,20\,\mathrm{kg\,m^{2}}\cdot (10,0\,\mathrm{rad/s})^{2} =
+                        10,0\,\mathrm{J}$</p>
+                </div>
+            </div>
+        </details>
+
+        <details class="formula" id="f-shm">
+            <summary>Harmonisk svingning (total): $E_{\mathrm{tot}} = \tfrac{1}{2} \cdot k \cdot A^{2}$
+            </summary>
+            <div class="panel">
+                <p class="lead">Total mekanisk energi i en ideel fjeder-svingning.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$E_{\mathrm{tot}}$ - total mekanisk energi (Joule, J)</li>
+                        <li>$k$ - fjederkonstant (Newton per meter, N/m)</li>
+                        <li>$A$ - amplitude (meter, m)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel:</strong>
+                    <p>$k=25,0\,\mathrm{N/m}$, $A=0,20\,\mathrm{m}$</p>
+                    <p>$E_{\mathrm{tot}} = \tfrac{1}{2} \cdot 25,0\,\mathrm{N/m} \cdot
+                        (0,20\,\mathrm{m})^{2} = 0,50\,\mathrm{J}$</p>
+                </div>
+            </div>
+        </details>
+
+        <!-- KINEMATIK -->
+    </details>
+
+    <details class="section-wrap">
+        <summary>
+            <h2 class="section">Kinematik (1D)</h2>
+        </summary>
+
+        <details class="formula" id="f-position-1d">
+            <summary>Position som funktion af tid: $s(t) = v_0 t + \frac{1}{2}at^2 + s_0$</summary>
+            <div class="panel">
+                <p class="lead">Grundligningen for position i 1D bevægelse med konstant acceleration.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$s(t)$ - position til tiden $t$ (meter, m)</li>
+                        <li>$v_0$ - begyndelseshastighed (meter per sekund, m/s)</li>
+                        <li>$a$ - acceleration (meter per sekund i anden, m/s²)</li>
+                        <li>$t$ - tid (sekund, s)</li>
+                        <li>$s_0$ - startposition (meter, m)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel:</strong>
+                    <p>$v_0 = 5,0\,\mathrm{m/s}$, $a = 2,0\,\mathrm{m/s^2}$, $s_0 = 0\,\mathrm{m}$, $t =
+                        3,0\,\mathrm{s}$</p>
+                    <p>$s(3,0) = 5,0\,\mathrm{m/s} \cdot 3,0\,\mathrm{s} + \frac{1}{2} \cdot 2,0\,\mathrm{m/s^2} \cdot
+                        (3,0\,\mathrm{s})^2 + 0\,\mathrm{m}$</p>
+                    <p>$s(3,0) = 15,0\,\mathrm{m} + 9,0\,\mathrm{m} = 24,0\,\mathrm{m}$</p>
+                </div>
+                <div class="remember">
+                    <strong>Husk:</strong>
+                    <p contenteditable="true" data-formula-id="f-position-1d">Denne formel gælder kun for konstant
+                        acceleration. Husk at accelerationen kan være negativ (bremsning).</p>
+                    <div class="edit-hint">Klik for at redigere</div>
+                </div>
+            </div>
+        </details>
+
+        <details class="formula" id="f-velocity-1d">
+            <summary>Hastighed som funktion af tid: $v(t) = v_0 + at$</summary>
+            <div class="panel">
+                <p class="lead">Hastigheden til tiden $t$ for konstant acceleration.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$v(t)$ - hastighed til tiden $t$ (meter per sekund, m/s)</li>
+                        <li>$v_0$ - begyndelseshastighed (meter per sekund, m/s)</li>
+                        <li>$a$ - acceleration (meter per sekund i anden, m/s²)</li>
+                        <li>$t$ - tid (sekund, s)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel:</strong>
+                    <p>$v_0 = 10,0\,\mathrm{m/s}$, $a = -2,0\,\mathrm{m/s^2}$ (bremsning), $t = 4,0\,\mathrm{s}$</p>
+                    <p>$v(4,0) = 10,0\,\mathrm{m/s} + (-2,0\,\mathrm{m/s^2}) \cdot 4,0\,\mathrm{s}$</p>
+                    <p>$v(4,0) = 10,0\,\mathrm{m/s} - 8,0\,\mathrm{m/s} = 2,0\,\mathrm{m/s}$</p>
+                </div>
+            </div>
+        </details>
+
+        <details class="formula" id="f-velocity-position">
+            <summary>Hastighed og position: $v^2 - v_0^2 = 2a(s - s_0)$</summary>
+            <div class="panel">
+                <p class="lead">Forbindelse mellem hastighed og position uden at kende tiden.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$v$ - sluthastighed (meter per sekund, m/s)</li>
+                        <li>$v_0$ - begyndelseshastighed (meter per sekund, m/s)</li>
+                        <li>$a$ - acceleration (meter per sekund i anden, m/s²)</li>
+                        <li>$s$ - slutposition (meter, m)</li>
+                        <li>$s_0$ - startposition (meter, m)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel (bremsning):</strong>
+                    <p>$v_0 = 20,0\,\mathrm{m/s}$, $a = -5,0\,\mathrm{m/s^2}$, $v = 0\,\mathrm{m/s}$</p>
+                    <p>$0^2 - (20,0\,\mathrm{m/s})^2 = 2 \cdot (-5,0\,\mathrm{m/s^2}) \cdot (s - s_0)$</p>
+                    <p>$-400\,\mathrm{m^2/s^2} = -10\,\mathrm{m/s^2} \cdot (s - s_0)$</p>
+                    <p>$s - s_0 = 40,0\,\mathrm{m}$ (bremselængde)</p>
+                </div>
+            </div>
+        </details>
+
+        <details class="formula" id="f-special-rest">
+            <summary>Specialtilfælde: Start fra hvile ($v_0 = 0$)</summary>
+            <div class="panel">
+                <p class="lead">Forenklede formler når legemet starter fra hvile.</p>
+                <div class="symbols">
+                    <strong>Formler:</strong>
+                    <ul>
+                        <li>$s(t) = \frac{1}{2}at^2 + s_0$</li>
+                        <li>$v(t) = at$</li>
+                        <li>$v^2 = 2a(s - s_0)$</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel (frit fald):</strong>
+                    <p>$a = g = 9,82\,\mathrm{m/s^2}$, $t = 2,0\,\mathrm{s}$</p>
+                    <p>$v = 9,82\,\mathrm{m/s^2} \cdot 2,0\,\mathrm{s} = 19,6\,\mathrm{m/s}$</p>
+                    <p>$s = \frac{1}{2} \cdot 9,82\,\mathrm{m/s^2} \cdot (2,0\,\mathrm{s})^2 = 19,6\,\mathrm{m}$</p>
+                </div>
+            </div>
+        </details>
+
+        <details class="formula" id="f-special-stop">
+            <summary>Specialtilfælde: Kommer til hvile ($v = 0$)</summary>
+            <div class="panel">
+                <p class="lead">Bremsning - legemet stopper.</p>
+                <div class="symbols">
+                    <strong>Formler:</strong>
+                    <ul>
+                        <li>$s - s_0 = -\frac{v_0^2}{2a}$ (bremselængde)</li>
+                        <li>$t = -\frac{v_0}{a}$ (bremsetid)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel:</strong>
+                    <p>$v_0 = 30,0\,\mathrm{m/s}$, $a = -6,0\,\mathrm{m/s^2}$</p>
+                    <p>Bremselængde: $s - s_0 = -\frac{(30,0\,\mathrm{m/s})^2}{2 \cdot (-6,0\,\mathrm{m/s^2})}$</p>
+                    <p>$s - s_0 = -\frac{900\,\mathrm{m^2/s^2}}{-12,0\,\mathrm{m/s^2}} = 75,0\,\mathrm{m}$</p>
+                    <p>Bremsetid: $t = -\frac{30,0\,\mathrm{m/s}}{-6,0\,\mathrm{m/s^2}} = 5,0\,\mathrm{s}$</p>
+                </div>
+            </div>
+        </details>
+
+    </details>
+
+    <details class="section-wrap">
+        <summary>
+            <h2 class="section">Kinematik (2D) - Projektils bevægelse</h2>
+        </summary>
+
+        <details class="formula" id="f-projectile-components">
+            <summary>Begyndelseshastigheder: $v_{0x} = v_0 \cos(\theta)$, $v_{0y} = v_0 \sin(\theta)$</summary>
+            <div class="panel">
+                <p class="lead">Opdeling af begyndelseshastigheden i x- og y-komponenter.</p>
+
+                <!-- Projektils bevægelse figur -->
+                <div style="text-align: center; margin: 20px 0;">
+                    <svg width="400" height="200" viewBox="0 0 400 200"
+                        style="border: 1px solid #ddd; border-radius: 8px; background: #fafafa;">
+                        <!-- Koordinatsystem -->
+                        <line x1="20" y1="180" x2="380" y2="180" stroke="#333" stroke-width="2"
+                            marker-end="url(#arrowhead)" />
+                        <line x1="20" y1="180" x2="20" y2="20" stroke="#333" stroke-width="2"
+                            marker-end="url(#arrowhead)" />
+                        <text x="385" y="185" font-family="Arial, sans-serif" font-size="14" fill="#333">x</text>
+                        <text x="15" y="15" font-family="Arial, sans-serif" font-size="14" fill="#333">y</text>
+
+                        <!-- Parabolsk bane -->
+                        <path d="M 20 180 Q 200 60 380 180" stroke="#333" stroke-width="2" fill="none"
+                            stroke-dasharray="5,5" />
+
+                        <!-- Begyndelseshastighed vektor -->
+                        <line x1="20" y1="180" x2="70" y2="130" stroke="#0066cc" stroke-width="3"
+                            marker-end="url(#arrowhead-blue)" />
+                        <text x="45" y="150" font-family="Arial, sans-serif" font-size="12" fill="#0066cc">v₀</text>
+
+                        <!-- Vinkel markering -->
+                        <path d="M 20 180 L 35 180 A 15 15 0 0 1 30.6 168.2 Z" fill="none" stroke="#333"
+                            stroke-width="1.5" />
+                        <text x="28" y="170" font-family="Arial, sans-serif" font-size="12" fill="#333">α</text>
+
+                        <!-- Toppunkt -->
+                        <circle cx="200" cy="60" r="4" fill="#cc0000" />
+                        <text x="205" y="55" font-family="Arial, sans-serif" font-size="10"
+                            fill="#cc0000">Toppunkt</text>
+
+                        <!-- Tyngdekraft ved toppunkt -->
+                        <line x1="200" y1="60" x2="200" y2="80" stroke="#cc0000" stroke-width="2"
+                            marker-end="url(#arrowhead-red)" />
+                        <text x="205" y="75" font-family="Arial, sans-serif" font-size="10" fill="#cc0000">g</text>
+
+                        <!-- Hastighed ved toppunkt (kun vandret) -->
+                        <line x1="200" y1="60" x2="230" y2="60" stroke="#0066cc" stroke-width="2"
+                            marker-end="url(#arrowhead-blue)" />
+                        <text x="215" y="55" font-family="Arial, sans-serif" font-size="10" fill="#0066cc">v</text>
+
+                        <!-- Rækkevidde markering -->
+                        <line x1="380" y1="180" x2="380" y2="185" stroke="#333" stroke-width="1" />
+                        <text x="375" y="195" font-family="Arial, sans-serif" font-size="12" fill="#333">R</text>
+
+                        <!-- Startpunkt markering -->
+                        <circle cx="20" cy="180" r="3" fill="#333" />
+                        <text x="25" y="195" font-family="Arial, sans-serif" font-size="10" fill="#333">Start</text>
+
+                        <!-- Landing punkt markering -->
+                        <circle cx="380" cy="180" r="3" fill="#333" />
+                        <text x="350" y="195" font-family="Arial, sans-serif" font-size="10" fill="#333">Landing</text>
+
+                        <!-- Arrow markers -->
+                        <defs>
+                            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
+                            </marker>
+                            <marker id="arrowhead-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5"
+                                orient="auto">
+                                <polygon points="0 0, 10 3.5, 0 7" fill="#0066cc" />
+                            </marker>
+                            <marker id="arrowhead-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5"
+                                orient="auto">
+                                <polygon points="0 0, 10 3.5, 0 7" fill="#cc0000" />
+                            </marker>
+                        </defs>
+                    </svg>
+                    <p style="font-size: 12px; color: #666; margin-top: 8px;">
+                        <strong>Projektils bevægelse:</strong> Parabolsk bane med begyndelseshastighed $v_0$ i vinkel
+                        $\alpha$.
+                        Ved toppunktet er kun den vandrette hastighed tilbage, mens tyngdekraften virker nedad.
+                    </p>
+                </div>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$v_0$ - begyndelseshastighed (meter per sekund, m/s)</li>
+                        <li>$\theta$ - kastevinkel (grader eller radianer)</li>
+                        <li>$v_{0x}$ - x-komponent af hastighed (meter per sekund, m/s)</li>
+                        <li>$v_{0y}$ - y-komponent af hastighed (meter per sekund, m/s)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel:</strong>
+                    <p>$v_0 = 20,0\,\mathrm{m/s}$, $\theta = 30°$</p>
+                    <p>$v_{0x} = 20,0\,\mathrm{m/s} \cdot \cos(30°) = 20,0\,\mathrm{m/s} \cdot 0,866 =
+                        17,3\,\mathrm{m/s}$</p>
+                    <p>$v_{0y} = 20,0\,\mathrm{m/s} \cdot \sin(30°) = 20,0\,\mathrm{m/s} \cdot 0,500 =
+                        10,0\,\mathrm{m/s}$</p>
+                </div>
+            </div>
+        </details>
+
+        <details class="formula" id="f-projectile-position">
+            <summary>Position som funktion af tid: $x(t) = v_0 \cos(\theta) \cdot t$, $y(t) = y_0 + v_0 \sin(\theta)
+                \cdot t - \frac{1}{2}gt^2$</summary>
+            <div class="panel">
+                <p class="lead">Position i x- og y-retning som funktion af tiden.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$x(t)$ - x-position til tiden $t$ (meter, m)</li>
+                        <li>$y(t)$ - y-position til tiden $t$ (meter, m)</li>
+                        <li>$v_0$ - begyndelseshastighed (meter per sekund, m/s)</li>
+                        <li>$\theta$ - kastevinkel (grader eller radianer)</li>
+                        <li>$t$ - tid (sekund, s)</li>
+                        <li>$y_0$ - start-højde (meter, m)</li>
+                        <li>$g$ - tyngdeacceleration (meter per sekund i anden, m/s²)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel:</strong>
+                    <p>$v_0 = 15,0\,\mathrm{m/s}$, $\theta = 45°$, $y_0 = 0\,\mathrm{m}$, $t = 2,0\,\mathrm{s}$</p>
+                    <p>$x(2,0) = 15,0\,\mathrm{m/s} \cdot \cos(45°) \cdot 2,0\,\mathrm{s} = 21,2\,\mathrm{m}$</p>
+                    <p>$y(2,0) = 0\,\mathrm{m} + 15,0\,\mathrm{m/s} \cdot \sin(45°) \cdot 2,0\,\mathrm{s} - \frac{1}{2}
+                        \cdot 9,82\,\mathrm{m/s^2} \cdot (2,0\,\mathrm{s})^2$</p>
+                    <p>$y(2,0) = 21,2\,\mathrm{m} - 19,6\,\mathrm{m} = 1,2\,\mathrm{m}$</p>
+                </div>
+            </div>
+        </details>
+
+        <details class="formula" id="f-projectile-velocity">
+            <summary>Hastighed som funktion af tid: $v_x(t) = v_0 \cos(\theta)$, $v_y(t) = v_0 \sin(\theta) - gt$
+            </summary>
+            <div class="panel">
+                <p class="lead">Hastighedskomponenter som funktion af tiden.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$v_x(t)$ - x-hastighed til tiden $t$ (meter per sekund, m/s)</li>
+                        <li>$v_y(t)$ - y-hastighed til tiden $t$ (meter per sekund, m/s)</li>
+                        <li>$v_0$ - begyndelseshastighed (meter per sekund, m/s)</li>
+                        <li>$\theta$ - kastevinkel (grader eller radianer)</li>
+                        <li>$t$ - tid (sekund, s)</li>
+                        <li>$g$ - tyngdeacceleration (meter per sekund i anden, m/s²)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel:</strong>
+                    <p>$v_0 = 12,0\,\mathrm{m/s}$, $\theta = 60°$, $t = 1,5\,\mathrm{s}$</p>
+                    <p>$v_x(1,5) = 12,0\,\mathrm{m/s} \cdot \cos(60°) = 6,0\,\mathrm{m/s}$ (konstant)</p>
+                    <p>$v_y(1,5) = 12,0\,\mathrm{m/s} \cdot \sin(60°) - 9,82\,\mathrm{m/s^2} \cdot 1,5\,\mathrm{s}$</p>
+                    <p>$v_y(1,5) = 10,4\,\mathrm{m/s} - 14,7\,\mathrm{m/s} = -4,3\,\mathrm{m/s}$</p>
+                </div>
+            </div>
+        </details>
+
+        <details class="formula" id="f-projectile-trajectory">
+            <summary>Banekurve: $y = y_0 + x \tan(\theta) - \frac{g x^2}{2v_0^2}(1 + \tan^2(\theta))$</summary>
+            <div class="panel">
+                <p class="lead">Parabolsk bane - y som funktion af x.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$y$ - y-position (meter, m)</li>
+                        <li>$x$ - x-position (meter, m)</li>
+                        <li>$y_0$ - start-højde (meter, m)</li>
+                        <li>$\theta$ - kastevinkel (grader eller radianer)</li>
+                        <li>$v_0$ - begyndelseshastighed (meter per sekund, m/s)</li>
+                        <li>$g$ - tyngdeacceleration (meter per sekund i anden, m/s²)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel:</strong>
+                    <p>$v_0 = 10,0\,\mathrm{m/s}$, $\theta = 30°$, $y_0 = 0\,\mathrm{m}$, $x = 5,0\,\mathrm{m}$</p>
+                    <p>$y = 0\,\mathrm{m} + 5,0\,\mathrm{m} \cdot \tan(30°) - \frac{9,82\,\mathrm{m/s^2} \cdot
+                        (5,0\,\mathrm{m})^2}{2 \cdot (10,0\,\mathrm{m/s})^2}(1 + \tan^2(30°))$</p>
+                    <p>$y = 2,89\,\mathrm{m} - 0,61\,\mathrm{m} \cdot 1,33 = 2,08\,\mathrm{m}$</p>
+                </div>
+            </div>
+        </details>
+
+        <details class="formula" id="f-projectile-flight-time">
+            <summary>Flyvetid (når $y_{start} = y_{slut}$): $T = \frac{2v_0 \sin(\theta)}{g}$</summary>
+            <div class="panel">
+                <p class="lead">Tid fra kast til landing på samme højde.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$T$ - flyvetid (sekund, s)</li>
+                        <li>$v_0$ - begyndelseshastighed (meter per sekund, m/s)</li>
+                        <li>$\theta$ - kastevinkel (grader eller radianer)</li>
+                        <li>$g$ - tyngdeacceleration (meter per sekund i anden, m/s²)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel:</strong>
+                    <p>$v_0 = 20,0\,\mathrm{m/s}$, $\theta = 45°$</p>
+                    <p>$T = \frac{2 \cdot 20,0\,\mathrm{m/s} \cdot \sin(45°)}{9,82\,\mathrm{m/s^2}} =
+                        \frac{28,3\,\mathrm{m/s}}{9,82\,\mathrm{m/s^2}} = 2,88\,\mathrm{s}$</p>
+                </div>
+            </div>
+        </details>
+
+        <details class="formula" id="f-projectile-range">
+            <summary>Kastelængde (når $y_{start} = y_{slut}$): $R = \frac{v_0^2 \sin(2\theta)}{g}$</summary>
+            <div class="panel">
+                <p class="lead">Horisontal afstand fra kast til landing på samme højde.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$R$ - kastelængde (meter, m)</li>
+                        <li>$v_0$ - begyndelseshastighed (meter per sekund, m/s)</li>
+                        <li>$\theta$ - kastevinkel (grader eller radianer)</li>
+                        <li>$g$ - tyngdeacceleration (meter per sekund i anden, m/s²)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel:</strong>
+                    <p>$v_0 = 15,0\,\mathrm{m/s}$, $\theta = 30°$</p>
+                    <p>$R = \frac{(15,0\,\mathrm{m/s})^2 \cdot \sin(60°)}{9,82\,\mathrm{m/s^2}} =
+                        \frac{225\,\mathrm{m^2/s^2} \cdot 0,866}{9,82\,\mathrm{m/s^2}} = 19,8\,\mathrm{m}$</p>
+                </div>
+                <div class="remember">
+                    <strong>Husk:</strong>
+                    <p contenteditable="true" data-formula-id="f-projectile-range">Maksimal kastelængde opnås ved
+                        $\theta = 45°$ (når $y_{start} = y_{slut}$).</p>
+                    <div class="edit-hint">Klik for at redigere</div>
+                </div>
+            </div>
+        </details>
+
+        <details class="formula" id="f-projectile-max-height">
+            <summary>Maksimal højde: $h_{\text{max}} = y_0 + \frac{v_0^2 \sin^2(\theta)}{2g}$</summary>
+            <div class="panel">
+                <p class="lead">Højeste punkt i banen.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$h_{\text{max}}$ - maksimal højde (meter, m)</li>
+                        <li>$y_0$ - start-højde (meter, m)</li>
+                        <li>$v_0$ - begyndelseshastighed (meter per sekund, m/s)</li>
+                        <li>$\theta$ - kastevinkel (grader eller radianer)</li>
+                        <li>$g$ - tyngdeacceleration (meter per sekund i anden, m/s²)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel:</strong>
+                    <p>$v_0 = 25,0\,\mathrm{m/s}$, $\theta = 60°$, $y_0 = 0\,\mathrm{m}$</p>
+                    <p>$h_{\text{max}} = 0\,\mathrm{m} + \frac{(25,0\,\mathrm{m/s})^2 \cdot \sin^2(60°)}{2 \cdot
+                        9,82\,\mathrm{m/s^2}}$</p>
+                    <p>$h_{\text{max}} = \frac{625\,\mathrm{m^2/s^2} \cdot 0,75}{19,6\,\mathrm{m/s^2}} =
+                        23,9\,\mathrm{m}$</p>
+                </div>
+            </div>
+        </details>
+
+        <!-- ELEKTRISK ENERGI -->
+    </details>
+
+    <details class="section-wrap">
+        <summary>
+            <h2 class="section">Elektrisk energi</h2>
+        </summary>
+
+        <details class="formula" id="f-QU">
+            <summary>Elektrisk energi (ladning/spænding): $E = Q \cdot U$</summary>
+            <div class="panel">
+                <p class="lead">Arbejdet når ladningen $Q$ flyttes over spændingen $U$.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$E$ - elektrisk energi (Joule, J)</li>
+                        <li>$Q$ - elektrisk ladning (Coulomb, C)</li>
+                        <li>$U$ - spænding (Volt, V)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel:</strong>
+                    <p>$Q=3,0\,\mathrm{mC}=3,0\times 10^{-3}\,\mathrm{C}$, $U=9,0\,\mathrm{V}$</p>
+                    <p>$E = Q \cdot U = 3,0\times 10^{-3}\,\mathrm{C}\cdot 9,0\,\mathrm{V} = 0,027\,\mathrm{J}$</p>
+                </div>
+            </div>
+        </details>
+
+        <details class="formula" id="f-Pt">
+            <summary>Elektrisk energi (via effekt): $E = P \cdot t = U \cdot I \cdot t$</summary>
+            <div class="panel">
+                <p class="lead">Energi er effekt gange tid.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$E$ - elektrisk energi (Joule, J)</li>
+                        <li>$P$ - effekt (Watt, W)</li>
+                        <li>$t$ - tid (sekund, s)</li>
+                        <li>$U$ - spænding (Volt, V)</li>
+                        <li>$I$ - strømstyrke (Ampere, A)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel 1:</strong>
+                    <p>$P=60\,\mathrm{W}$, $t=10,0\,\mathrm{s}$ ⟹ $E=600\,\mathrm{J}$</p>
+                    <strong>Eksempel 2:</strong>
+                    <p>$U=12,0\,\mathrm{V}$, $I=5,00\,\mathrm{A}$, $t=10,0\,\mathrm{s}$ ⟹ $E=600\,\mathrm{J}$</p>
+                </div>
+            </div>
+        </details>
+
+        <details class="formula" id="f-joule">
+            <summary>Joules lov (varme i modstand): $E = I^{2} \cdot R \cdot t = \dfrac{U^{2} \cdot t}{R}$</summary>
+            <div class="panel">
+                <p class="lead">Varmeudvikling i en resistiv komponent.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$E$ - varmeenergi (Joule, J)</li>
+                        <li>$I$ - strømstyrke (Ampere, A)</li>
+                        <li>$R$ - elektrisk modstand (Ohm, Ω)</li>
+                        <li>$t$ - tid (sekund, s)</li>
+                        <li>$U$ - spænding (Volt, V)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel:</strong>
+                    <p>$I=2,00\,\mathrm{A}$, $R=5,00\,\Omega$, $t=30,0\,\mathrm{s}$</p>
+                    <p>$E = (2,00\,\mathrm{A})^{2}\cdot 5,00\,\Omega\cdot 30,0\,\mathrm{s} = 600\,\mathrm{J}$</p>
+                </div>
+            </div>
+        </details>
+
+        <details class="formula" id="f-bat">
+            <summary>Energi fra batteri (med indre modstand): $E = (U_{0} \cdot I - R_{\mathrm{i}} \cdot I^{2}) \cdot t$
+            </summary>
+            <div class="panel">
+                <p class="lead">Nettoenergi leveret til yderkredsen når batteriets indre tab medregnes.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$E$ - nettoenergi (Joule, J)</li>
+                        <li>$U_{0}$ - batteriets spænding (Volt, V)</li>
+                        <li>$I$ - strømstyrke (Ampere, A)</li>
+                        <li>$R_{\mathrm{i}}$ - indre modstand (Ohm, Ω)</li>
+                        <li>$t$ - tid (sekund, s)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel:</strong>
+                    <p>$U_{0}=12,0\,\mathrm{V}$, $R_{\mathrm{i}}=0,20\,\Omega$, $I=4,00\,\mathrm{A}$,
+                        $t=60,0\,\mathrm{s}$</p>
+                    <p>$E=(12,0\cdot 4,00 - 0,20\cdot 4,00^{2})\,\mathrm{W}\cdot 60,0\,\mathrm{s} = 2,69\times
+                        10^{3}\,\mathrm{J}$</p>
+                </div>
+            </div>
+        </details>
+
+        <details class="formula" id="f-cap">
+            <summary>Kondensator: $E_{\mathrm{C}} = \tfrac{1}{2} \cdot C \cdot U^{2} = \dfrac{Q^{2}}{2 \cdot C}$
+            </summary>
+            <div class="panel">
+                <p class="lead">Energi lagret i det elektriske felt.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$E_{\mathrm{C}}$ - kondensator energi (Joule, J)</li>
+                        <li>$C$ - kapacitans (Farad, F)</li>
+                        <li>$U$ - spænding (Volt, V)</li>
+                        <li>$Q$ - elektrisk ladning (Coulomb, C)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel:</strong>
+                    <p>$C=100\,\mu\mathrm{F}=1,00\times10^{-4}\,\mathrm{F}$, $U=12,0\,\mathrm{V}$</p>
+                    <p>$E_{\mathrm{C}} = \tfrac{1}{2}\cdot 1,00\times10^{-4}\,\mathrm{F}\cdot (12,0\,\mathrm{V})^{2} =
+                        7,20\,\mathrm{mJ}$</p>
+                </div>
+            </div>
+        </details>
+
+        <details class="formula" id="f-ind">
+            <summary>Spole (induktans): $E_{\mathrm{L}} = \tfrac{1}{2} \cdot L \cdot I^{2}$</summary>
+            <div class="panel">
+                <p class="lead">Energi lagret i det magnetiske felt.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$E_{\mathrm{L}}$ - induktiv energi (Joule, J)</li>
+                        <li>$L$ - induktans (Henry, H)</li>
+                        <li>$I$ - strømstyrke (Ampere, A)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel:</strong>
+                    <p>$L=2,00\,\mathrm{H}$, $I=0,500\,\mathrm{A}$</p>
+                    <p>$E_{\mathrm{L}} = \tfrac{1}{2}\cdot 2,00\,\mathrm{H}\cdot (0,500\,\mathrm{A})^{2} =
+                        0,250\,\mathrm{J}$</p>
+                </div>
+            </div>
+        </details>
+
+        <!-- TERMISK ENERGI -->
+    </details>
+
+    <details class="section-wrap">
+        <summary>
+            <h2 class="section">Termisk energi</h2>
+        </summary>
+
+        <details class="formula" id="f-mcDT">
+            <summary>Sensibel varme: $E = m \cdot c \cdot \Delta T$</summary>
+            <div class="panel">
+                <p class="lead">Temperaturændring uden faseændring.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$E$ - varmeenergi (Joule, J)</li>
+                        <li>$m$ - masse (kilogram, kg)</li>
+                        <li>$c$ - specifik varmekapacitet (Joule per kilogram per Kelvin, J⋅kg⁻¹⋅K⁻¹)</li>
+                        <li>$\Delta T$ - temperaturændring (Kelvin, K)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel (vand):</strong>
+                    <p>$m=0,250\,\mathrm{kg}$, $c=4186\,\mathrm{J\,kg^{-1}\,K^{-1}}$, $\Delta T=20,0\,\mathrm{K}$</p>
+                    <p>$E = 0,250\,\mathrm{kg}\cdot 4186\,\mathrm{J\,kg^{-1}\,K^{-1}}\cdot 20,0\,\mathrm{K} =
+                        2,093\times 10^{4}\,\mathrm{J} \approx 20,93\,\mathrm{kJ}$</p>
+                </div>
+            </div>
+        </details>
+
+        <details class="formula" id="f-latent">
+            <summary>Latent varme: $E = m \cdot L$</summary>
+            <div class="panel">
+                <p class="lead">Energi til faseændring ved konstant temperatur.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$E$ - latent varmeenergi (Joule, J)</li>
+                        <li>$m$ - masse (kilogram, kg)</li>
+                        <li>$L$ - latent varme (Joule per kilogram, J/kg)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel (is smelter):</strong>
+                    <p>$m=0,100\,\mathrm{kg}$, $L_{\mathrm{s}}\approx 334\,\mathrm{kJ\,kg^{-1}}$</p>
+                    <p>$E = 0,100\,\mathrm{kg}\cdot 334\,\mathrm{kJ\,kg^{-1}} = 33,4\,\mathrm{kJ}$</p>
+                </div>
+            </div>
+        </details>
+
+        <details class="formula" id="f-firstlaw">
+            <summary>1. hovedsætning (termodynamik): $\Delta U = Q - A$</summary>
+            <div class="panel">
+                <p class="lead">Ændring i indre energi = tilført varme minus udført arbejde (af systemet).</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$\Delta U$ - ændring i indre energi (Joule, J)</li>
+                        <li>$Q$ - tilført varme (Joule, J)</li>
+                        <li>$A$ - udført arbejde (Joule, J)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel:</strong>
+                    <p>$Q=500\,\mathrm{J}$, $A=200\,\mathrm{J}$</p>
+                    <p>$\Delta U = 500\,\mathrm{J} - 200\,\mathrm{J} = 300\,\mathrm{J}$</p>
+                </div>
+            </div>
+        </details>
+
+
+
+        <!-- KVANTE- OG KERNEFYSIK -->
+    </details>
+
+    <details class="section-wrap">
+        <summary>
+            <h2 class="section">Kvante- og kernefysik</h2>
+        </summary>
+
+        <details class="formula" id="f-hf">
+            <summary>Fotonenergi (frekvens): $E = \mathrm{h} \cdot f$</summary>
+            <div class="panel">
+                <p class="lead">Energi er proportional med frekvensen.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$E$ - fotonenergi (Joule, J)</li>
+                        <li>$\mathrm{h}$ - Plancks konstant (Joule gange sekund, J⋅s)</li>
+                        <li>$f$ - frekvens (Hertz, Hz)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel:</strong>
+                    <p>$f=5,0\times 10^{14}\,\mathrm{Hz}$, $\mathrm{h}=6,626\times10^{-34}\,\mathrm{J\,s}$</p>
+                    <p>$E = 3,31\times10^{-19}\,\mathrm{J} \approx 2,07\,\mathrm{eV}$</p>
+                </div>
+            </div>
+        </details>
+
+        <details class="formula" id="f-hc">
+            <summary>Fotonenergi (bølgelængde): $E = \dfrac{\mathrm{h} \cdot \mathrm{c}}{\lambda}$</summary>
+            <div class="panel">
+                <p class="lead">Kortere bølgelængde giver højere energi.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$E$ - fotonenergi (Joule, J)</li>
+                        <li>$\mathrm{h}$ - Plancks konstant (Joule gange sekund, J⋅s)</li>
+                        <li>$\mathrm{c}$ - lysets hastighed (meter per sekund, m/s)</li>
+                        <li>$\lambda$ - bølgelængde (meter, m)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel:</strong>
+                    <p>$\lambda = 500\,\mathrm{nm}=5,0\times10^{-7}\,\mathrm{m}$,
+                        $\mathrm{h}=6,626\times10^{-34}\,\mathrm{J\,s}$, $\mathrm{c}=2,998\times10^{8}\,\mathrm{m/s}$
+                    </p>
+                    <p>$E \approx 3,97\times10^{-19}\,\mathrm{J} \approx 2,48\,\mathrm{eV}$</p>
+                </div>
+            </div>
+        </details>
+
+        <details class="formula" id="f-emc2">
+            <summary>Hvileenergi: $E = m \cdot \mathrm{c}^{2}$</summary>
+            <div class="panel">
+                <p class="lead">Masse og energi er ækvivalente.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$E$ - hvileenergi (Joule, J)</li>
+                        <li>$m$ - masse (kilogram, kg)</li>
+                        <li>$\mathrm{c}$ - lysets hastighed (meter per sekund, m/s)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel:</strong>
+                    <p>$m=1,00\,\mathrm{g}=1,00\times10^{-3}\,\mathrm{kg}$, $\mathrm{c}=2,998\times10^{8}\,\mathrm{m/s}$
+                    </p>
+                    <p>$E = 1,00\times10^{-3}\,\mathrm{kg}\cdot (2,998\times10^{8}\,\mathrm{m/s})^{2} \approx 8,99\times
+                        10^{13}\,\mathrm{J}$</p>
+                </div>
+            </div>
+        </details>
+
+        <details class="formula" id="f-Hlevels">
+            <summary>Brintatomets energiniveauer (Bohr): $E_{n} = -\dfrac{13,6\,\mathrm{eV}}{n^{2}}$</summary>
+            <div class="panel">
+                <p class="lead">Diskrete energitilstande for brintatomet.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$E_{n}$ - energi for niveau $n$ (elektronvolt, eV)</li>
+                        <li>$n$ - kvantetal (heltal: 1, 2, 3, ...)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel:</strong>
+                    <p>$E_{2}=-3,40\,\mathrm{eV}$, $E_{3}=-1,51\,\mathrm{eV}$</p>
+                </div>
+            </div>
+        </details>
+
+        <details class="formula" id="f-Hion">
+            <summary>Ioniseringsenergi (brint): $E_{\mathrm{ion}}=13,6\,\mathrm{eV}$</summary>
+            <div class="panel">
+                <p class="lead">Energi for at fjerne elektronen fra grundtilstanden ($n=1$).</p>
+            </div>
+        </details>
+
+        <details class="formula" id="f-Q">
+            <summary>Q-værdi (kernereaktion): $Q = (\sum m_{\mathrm{ind}} - \sum m_{\mathrm{ud}}) \cdot \mathrm{c}^{2}$
+            </summary>
+            <div class="panel">
+                <p class="lead">Nettoenergi frigivet/optaget i reaktionen.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$Q$ - Q-værdi (Joule, J)</li>
+                        <li>$\sum m_{\mathrm{ind}}$ - sum af indgående masser (kilogram, kg)</li>
+                        <li>$\sum m_{\mathrm{ud}}$ - sum af udgående masser (kilogram, kg)</li>
+                        <li>$\mathrm{c}$ - lysets hastighed (meter per sekund, m/s)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel:</strong>
+                    <p>$\Delta m=1,00\times10^{-30}\,\mathrm{kg}$</p>
+                    <p>$Q = \Delta m \cdot \mathrm{c}^{2} \approx 9,0\times10^{-14}\,\mathrm{J}$</p>
+                </div>
+            </div>
+        </details>
+
+        <details class="formula" id="f-binding">
+            <summary>Bindingsenergi: $E_{\mathrm{binding}} = \Delta m \cdot \mathrm{c}^{2}$</summary>
+            <div class="panel">
+                <p class="lead">Energi bundet i atomkernen (masse-defekt).</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$E_{\mathrm{binding}}$ - bindingsenergi (Joule, J)</li>
+                        <li>$\Delta m$ - masse-defekt (kilogram, kg)</li>
+                        <li>$\mathrm{c}$ - lysets hastighed (meter per sekund, m/s)</li>
+                    </ul>
+                </div>
+            </div>
+        </details>
+
+        <!-- ARBEJDE OG EFFEKT -->
+    </details>
+
+    <details class="section-wrap">
+        <summary>
+            <h2 class="section">Arbejde og effekt</h2>
+        </summary>
+
+        <details class="formula" id="f-WFs">
+            <summary>Arbejde (konstant, parallelt): $A = F \cdot s$</summary>
+            <div class="panel">
+                <p class="lead">Arbejde udført af en konstant kraft langs bevægelsesretningen.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$A$ - arbejde (Joule, J)</li>
+                        <li>$F$ - kraft (Newton, N)</li>
+                        <li>$s$ - vejlængde (meter, m)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel:</strong>
+                    <p>$F=15,0\,\mathrm{N}$, $s=3,00\,\mathrm{m}$</p>
+                    <p>$A = 15,0\,\mathrm{N}\cdot 3,00\,\mathrm{m} = 45,0\,\mathrm{J}$</p>
+                </div>
+            </div>
+        </details>
+
+        <details class="formula" id="f-Wint">
+            <summary>Arbejde (generelt): $A = \displaystyle\int \vec F\!\cdot d\vec s$</summary>
+            <div class="panel">
+                <p class="lead">Definition via linjeintegral.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$A$ - arbejde (Joule, J)</li>
+                        <li>$\vec F$ - kraftvektor (Newton, N)</li>
+                        <li>$d\vec s$ - infinitesimal vejvektor (meter, m)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel (fjederkraft):</strong>
+                    <p>$F(x)=k \cdot x$ fra $x=0$ til $x=A$</p>
+                    <p>$A=\int_{0}^{A} k \cdot x\,dx = \tfrac{1}{2} \cdot k \cdot A^{2}$</p>
+                </div>
+            </div>
+        </details>
+
+        <details class="formula" id="f-Wrot">
+            <summary>Arbejde ved rotation: $A = M \cdot \theta$</summary>
+            <div class="panel">
+                <p class="lead">Moment $M$ udfører arbejde ved vinkelændringen $\theta$.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$A$ - arbejde (Joule, J)</li>
+                        <li>$M$ - moment (Newton gange meter, N⋅m)</li>
+                        <li>$\theta$ - vinkelændring (radian, rad)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel:</strong>
+                    <p>$M=2,00\,\mathrm{N\,m}$, $\theta=3,00\,\mathrm{rad}$</p>
+                    <p>$A = 2,00\,\mathrm{N\,m}\cdot 3,00\,\mathrm{rad} = 6,00\,\mathrm{J}$</p>
+                </div>
+            </div>
+        </details>
+
+        <details class="formula" id="f-Pmech">
+            <summary>Effekt (mekanisk): $P = \dfrac{E}{t} = F \cdot v$</summary>
+            <div class="panel">
+                <p class="lead">Hvor hurtigt arbejdet udføres.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$P$ - effekt (Watt, W)</li>
+                        <li>$E$ - energi (Joule, J)</li>
+                        <li>$t$ - tid (sekund, s)</li>
+                        <li>$F$ - kraft (Newton, N)</li>
+                        <li>$v$ - hastighed (meter per sekund, m/s)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel 1:</strong>
+                    <p>$E=600\,\mathrm{J}$, $t=10,0\,\mathrm{s}$ ⟹ $P=60,0\,\mathrm{W}$</p>
+                    <strong>Eksempel 2:</strong>
+                    <p>$F=12,0\,\mathrm{N}$, $v=2,00\,\mathrm{m/s}$ ⟹ $P=24,0\,\mathrm{W}$</p>
+                </div>
+            </div>
+        </details>
+
+        <details class="formula" id="f-Pel">
+            <summary>Effekt (elektrisk): $P = U \cdot I$</summary>
+            <div class="panel">
+                <p class="lead">Elektrisk effekt som spænding gange strøm.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$P$ - elektrisk effekt (Watt, W)</li>
+                        <li>$U$ - spænding (Volt, V)</li>
+                        <li>$I$ - strømstyrke (Ampere, A)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel:</strong>
+                    <p>$U=10,0\,\mathrm{V}$, $I=2,00\,\mathrm{A}$</p>
+                    <p>$P = 20,0\,\mathrm{W}$</p>
+                </div>
+            </div>
+        </details>
+
+        <!-- ENERGIBEVARELSE -->
+    </details>
+
+    <details class="section-wrap">
+        <summary>
+            <h2 class="section">Energibevarelse</h2>
+        </summary>
+
+        <details class="formula" id="f-cons">
+            <summary>Total energi (bevarelse): $E_{\mathrm{tot}} = E_{\mathrm{k}} + E_{\mathrm{p}} + E_{\mathrm{intern}}
+                = \text{konstant}$</summary>
+            <div class="panel">
+                <p class="lead">I lukkede systemer (uden tab) er den totale energi bevaret.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$E_{\mathrm{tot}}$ - total energi (Joule, J)</li>
+                        <li>$E_{\mathrm{k}}$ - kinetisk energi (Joule, J)</li>
+                        <li>$E_{\mathrm{p}}$ - potentiel energi (Joule, J)</li>
+                        <li>$E_{\mathrm{intern}}$ - indre energi (Joule, J)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel (frit fald uden tab):</strong>
+                    <p>$E_{\mathrm{k}} + E_{\mathrm{p}} = \text{konstant}$</p>
+                </div>
+            </div>
+        </details>
+
+        <details class="formula" id="f-Erel">
+            <summary>Relativistisk totalenergi: $E_{\mathrm{tot}} = \sqrt{(p \cdot \mathrm{c})^{2} +
+                (m \cdot \mathrm{c}^{2})^{2}}$</summary>
+            <div class="panel">
+                <p class="lead">For fotoner ($m=0$): $E = p \cdot \mathrm{c}$.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$E_{\mathrm{tot}}$ - relativistisk totalenergi (Joule, J)</li>
+                        <li>$p$ - impuls (kilogram gange meter per sekund, kg⋅m/s)</li>
+                        <li>$\mathrm{c}$ - lysets hastighed (meter per sekund, m/s)</li>
+                        <li>$m$ - masse (kilogram, kg)</li>
+                    </ul>
+                </div>
+            </div>
+        </details>
+
+        <details class="formula" id="f-eta">
+            <summary>Nyttevirkning: $\eta = \dfrac{E_{\mathrm{nyttig}}}{E_{\mathrm{tilført}}} =
+                \dfrac{P_{\mathrm{nyttig}}}{P_{\mathrm{tilført}}}$</summary>
+            <div class="panel">
+                <p class="lead">Andel af den tilførte energi, der udnyttes nyttigt.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$\eta$ - nyttevirkning (dimensionsløs)</li>
+                        <li>$E_{\mathrm{nyttig}}$ - nyttig energi (Joule, J)</li>
+                        <li>$E_{\mathrm{tilført}}$ - tilført energi (Joule, J)</li>
+                        <li>$P_{\mathrm{nyttig}}$ - nyttig effekt (Watt, W)</li>
+                        <li>$P_{\mathrm{tilført}}$ - tilført effekt (Watt, W)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel:</strong>
+                    <p>$E_{\mathrm{tilført}}=200\,\mathrm{J}$, $E_{\mathrm{nyttig}}=150\,\mathrm{J}$</p>
+                    <p>$\eta = 0,75 = 75\%$</p>
+                </div>
+            </div>
+        </details>
+
+        <details class="formula" id="f-lost">
+            <summary>Tabt energi: $E_{\mathrm{tabt}} = E_{\mathrm{tilført}} - E_{\mathrm{nyttig}}$</summary>
+            <div class="panel">
+                <p class="lead">Den del af energien, som ikke udnyttes nyttigt.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$E_{\mathrm{tabt}}$ - tabt energi (Joule, J)</li>
+                        <li>$E_{\mathrm{tilført}}$ - tilført energi (Joule, J)</li>
+                        <li>$E_{\mathrm{nyttig}}$ - nyttig energi (Joule, J)</li>
+                    </ul>
+                </div>
+                <div class="example">
+                    <strong>Eksempel:</strong>
+                    <p>$E_{\mathrm{tilført}}=200\,\mathrm{J}$, $E_{\mathrm{nyttig}}=150\,\mathrm{J}$</p>
+                    <p>$E_{\mathrm{tabt}} = 50,0\,\mathrm{J}$</p>
+                </div>
+            </div>
+        </details>
+
+        <!-- KONSTANTER OG OPSLAG -->
+    </details>
+
+    <details class="section-wrap">
+        <summary>
+            <h2 class="section">Fundamentale konstanter</h2>
+        </summary>
+        <details class="formula" id="f-konstanter">
+            <summary>Opslag:
+                $\mathrm{h},\,\mathrm{c},\,\mathrm{G},\,\mathrm{g},\,\mathrm{k_B},\,\mathrm{R},\,1\,\mathrm{eV}$
+            </summary>
+            <div class="panel">
+                <ul>
+                    <li>$\mathrm{h} = 6,626\times10^{-34}\,\mathrm{J\,s}$</li>
+                    <li>$\mathrm{c} = 2,998\times10^{8}\,\mathrm{m/s}$</li>
+                    <li>$\mathrm{G} = 6,674\times10^{-11}\,\mathrm{N\,m^{2}\,kg^{-2}}$</li>
+                    <li>$\mathrm{g} = 9,82\,\mathrm{m/s^{2}}$</li>
+                    <li>$\mathrm{k_B} = 1,381\times10^{-23}\,\mathrm{J/K}$</li>
+                    <li>$\mathrm{R} = 8,314\,\mathrm{J\,mol^{-1}\,K^{-1}}$</li>
+                    <li>$1\,\mathrm{eV} = 1,602\times10^{-19}\,\mathrm{J}$</li>
+                </ul>
+            </div>
+        </details>
+
+    </details>
+
+    <details class="section-wrap">
+        <summary>
+            <h2 class="section">Brintatomets energitilstande</h2>
+        </summary>
+        <details class="formula" id="f-Hspectra">
+            <summary>Spektrallinjer (overgange): $E_{\mathrm{foton}} = E_{\mathrm{højere}} - E_{\mathrm{lavere}} =
+                \mathrm{h} \cdot f = \dfrac{\mathrm{h} \cdot \mathrm{c}}{\lambda}$</summary>
+            <div class="panel">
+                <p class="lead">Fotonens energi svarer til forskellen mellem to niveauer.</p>
+                <div class="symbols">
+                    <strong>Symboler:</strong>
+                    <ul>
+                        <li>$E_{\mathrm{foton}}$ - fotonenergi (Joule, J)</li>
+                        <li>$E_{\mathrm{højere}}$ - energi af højere niveau (Joule, J)</li>
+                        <li>$E_{\mathrm{lavere}}$ - energi af lavere niveau (Joule, J)</li>
+                        <li>$\mathrm{h}$ - Plancks konstant (Joule gange sekund, J⋅s)</li>
+                        <li>$f$ - frekvens (Hertz, Hz)</li>
+                        <li>$\mathrm{c}$ - lysets hastighed (meter per sekund, m/s)</li>
+                        <li>$\lambda$ - bølgelængde (meter, m)</li>
+                    </ul>
+                </div>
+            </div>
+        </details>
+
+    </details>
+
+    <p style="color:#6b7280; margin-top:18px">Tip: Vil du linke direkte til en boks, brug ankeret i dens id, fx
+        <code>#f-kinetisk</code>.
+    </p>
+
+    <script>
+        // Search functionality
+        document.addEventListener('DOMContentLoaded', function () {
+            var searchInput = document.getElementById('searchInput');
+            var searchResults = document.getElementById('searchResults');
+            var clearSearchBtn = document.getElementById('clearSearch');
+            var formulas = document.querySelectorAll('.formula');
+            var sections = document.querySelectorAll('.section-wrap');
+
+            // Helper function to check if all words in search term are found in text
+            function matchesAllWords(text, searchTerm) {
+                if (!searchTerm) return true;
+
+                // Split search term into individual words
+                var searchWords = searchTerm.split(/\s+/).filter(function (word) {
+                    return word.length > 0;
+                });
+
+                // Check if all words are found in the text
+                for (var i = 0; i < searchWords.length; i++) {
+                    if (!text.includes(searchWords[i])) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            // Search function
+            function performSearch() {
+                var searchTerm = searchInput.value.toLowerCase().trim();
+
+                if (searchTerm === '') {
+                    // Reset everything
+                    for (var i = 0; i < formulas.length; i++) {
+                        var formula = formulas[i];
+                        formula.classList.remove('hidden');
+                        formula.classList.remove('has-results');
+                        // Remove highlights
+                        var highlightedElements = formula.querySelectorAll('.search-highlight');
+                        for (var j = 0; j < highlightedElements.length; j++) {
+                            var el = highlightedElements[j];
+                            el.outerHTML = el.innerHTML;
+                        }
+                    }
+
+                    for (var i = 0; i < sections.length; i++) {
+                        var section = sections[i];
+                        section.classList.remove('hidden');
+                        section.classList.remove('has-results');
+                        // Remove highlights from section titles
+                        var sectionTitle = section.querySelector('h2');
+                        if (sectionTitle) {
+                            var highlightedElements = sectionTitle.querySelectorAll('.search-highlight');
+                            for (var j = 0; j < highlightedElements.length; j++) {
+                                var el = highlightedElements[j];
+                                el.outerHTML = el.innerHTML;
+                            }
+                        }
+                    }
+
+                    searchResults.textContent = '';
+                    clearSearchBtn.style.display = 'none';
+                    return;
+                }
+
+                var totalMatches = 0;
+                var sectionsWithResults = 0;
+
+                // First: Search in section titles (prioritized)
+                for (var i = 0; i < sections.length; i++) {
+                    var section = sections[i];
+                    var sectionFormulas = section.querySelectorAll('.formula');
+                    var sectionTitle = section.querySelector('h2');
+                    var sectionTitleMatches = false;
+
+                    if (sectionTitle) {
+                        var titleText = getCleanText(sectionTitle).toLowerCase();
+                        if (matchesAllWords(titleText, searchTerm)) {
+                            sectionTitleMatches = true;
+                            // Highlight search term in section title
+                            highlightTextSafely(sectionTitle, searchTerm);
+                            // Show all formulas in this section if title matches
+                            for (var j = 0; j < sectionFormulas.length; j++) {
+                                sectionFormulas[j].classList.remove('hidden');
+                                sectionFormulas[j].classList.add('has-results');
+                                totalMatches++;
+                            }
+                        }
+                    }
+
+                    if (sectionTitleMatches) {
+                        section.classList.remove('hidden');
+                        section.classList.add('has-results');
+                        sectionsWithResults++;
+                    }
+                }
+
+                // Second: Search through individual formulas (only if not already shown by title match)
+                for (var i = 0; i < formulas.length; i++) {
+                    var formula = formulas[i];
+
+                    // Skip if already shown by section title match
+                    if (!formula.classList.contains('hidden')) {
+                        continue;
+                    }
+
+                    var summary = formula.querySelector('summary');
+                    var panel = formula.querySelector('.panel');
+
+                    if (!summary || !panel) continue;
+
+                    // Get text content, excluding math formulas
+                    var summaryText = getCleanText(summary);
+                    var panelText = getCleanText(panel);
+                    var fullText = (summaryText + ' ' + panelText).toLowerCase();
+
+                    if (matchesAllWords(fullText, searchTerm)) {
+                        formula.classList.remove('hidden');
+                        formula.classList.add('has-results');
+                        totalMatches++;
+
+                        // Highlight search term in summary
+                        if (matchesAllWords(summaryText.toLowerCase(), searchTerm)) {
+                            highlightTextSafely(summary, searchTerm);
+                        }
+
+                        // Highlight search term in panel
+                        if (matchesAllWords(panelText.toLowerCase(), searchTerm)) {
+                            highlightTextSafely(panel, searchTerm);
+                        }
+                    } else {
+                        formula.classList.add('hidden');
+                        formula.classList.remove('has-results');
+                    }
+                }
+
+                // Final: Handle section visibility based on visible formulas
+                for (var i = 0; i < sections.length; i++) {
+                    var section = sections[i];
+                    var sectionFormulas = section.querySelectorAll('.formula');
+                    var hasVisibleFormulas = false;
+
+                    // Check if any formulas in this section are visible
+                    for (var j = 0; j < sectionFormulas.length; j++) {
+                        if (!sectionFormulas[j].classList.contains('hidden')) {
+                            hasVisibleFormulas = true;
+                            break;
+                        }
+                    }
+
+                    if (hasVisibleFormulas) {
+                        section.classList.remove('hidden');
+                        section.classList.add('has-results');
+                        sectionsWithResults++;
+                    } else {
+                        section.classList.add('hidden');
+                        section.classList.remove('has-results');
+                    }
+                }
+
+                // Update results display
+                if (totalMatches > 0) {
+                    searchResults.textContent = `Fundet ${totalMatches} formel${totalMatches > 1 ? 'er' : ''} i ${sectionsWithResults} sektion${sectionsWithResults > 1 ? 'er' : ''}`;
+                    clearSearchBtn.style.display = 'inline-block';
+                } else {
+                    searchResults.textContent = 'Ingen resultater fundet';
+                    clearSearchBtn.style.display = 'inline-block';
+                }
+            }
+
+            // Get clean text content (excluding math formulas)
+            function getCleanText(element) {
+                // Clone the element to avoid modifying the original
+                var clone = element.cloneNode(true);
+
+                // Remove all script tags
+                var scripts = clone.querySelectorAll('script');
+                for (var i = 0; i < scripts.length; i++) {
+                    scripts[i].remove();
+                }
+
+                // Remove MathJax elements and math content
+                var mathElements = clone.querySelectorAll('.MathJax, .mjx-chtml, .mjx-math, [class*="mjx-"]');
+                for (var i = 0; i < mathElements.length; i++) {
+                    mathElements[i].remove();
+                }
+
+                // Remove any remaining math content by looking for $...$ patterns
+                var text = clone.textContent || clone.innerText || '';
+
+                // Remove LaTeX math expressions (both inline and display)
+                text = text.replace(/\$[^$]*\$/g, ''); // Inline math
+                text = text.replace(/\$\$[^$]*\$\$/g, ''); // Display math
+
+                // Clean up extra whitespace
+                text = text.replace(/\s+/g, ' ').trim();
+
+                return text;
+            }
+
+            // Highlight text safely (avoiding math elements)
+            function highlightTextSafely(element, searchTerm) {
+                // Only highlight in text nodes that are not inside math elements
+                var textNodes = [];
+                var walker = document.createTreeWalker(
+                    element,
+                    NodeFilter.SHOW_TEXT,
+                    {
+                        acceptNode: function (node) {
+                            // Check if this text node is inside a math element
+                            var parent = node.parentElement;
+                            while (parent && parent !== element) {
+                                if (parent.classList.contains('MathJax') ||
+                                    parent.classList.contains('mjx-chtml') ||
+                                    parent.classList.contains('mjx-math') ||
+                                    parent.classList.contains('search-highlight')) {
+                                    return NodeFilter.FILTER_REJECT;
+                                }
+                                parent = parent.parentElement;
+                            }
+                            return NodeFilter.FILTER_ACCEPT;
+                        }
+                    }
+                );
+
+                var node;
+                while (node = walker.nextNode()) {
+                    textNodes.push(node);
+                }
+
+                // Highlight in each text node
+                for (var i = 0; i < textNodes.length; i++) {
+                    var textNode = textNodes[i];
+                    var text = textNode.textContent;
+                    var lowerText = text.toLowerCase();
+                    var searchTermLower = searchTerm.toLowerCase();
+
+                    // Split search term into words and highlight each word
+                    var searchWords = searchTermLower.split(/\s+/).filter(function (word) {
+                        return word.length > 0;
+                    });
+
+                    var fragment = document.createDocumentFragment();
+                    var lastIndex = 0;
+                    var currentIndex = 0;
+
+                    // Find and highlight each word
+                    for (var j = 0; j < searchWords.length; j++) {
+                        var word = searchWords[j];
+                        var searchIndex = lowerText.indexOf(word, currentIndex);
+
+                        if (searchIndex !== -1) {
+                            // Add text before the match
+                            if (searchIndex > lastIndex) {
+                                fragment.appendChild(document.createTextNode(text.substring(lastIndex, searchIndex)));
+                            }
+
+                            // Add the highlighted match
+                            var span = document.createElement('span');
+                            span.className = 'search-highlight';
+                            span.textContent = text.substring(searchIndex, searchIndex + word.length);
+                            fragment.appendChild(span);
+
+                            lastIndex = searchIndex + word.length;
+                            currentIndex = searchIndex + 1; // Continue searching from next position
+                        }
+                    }
+
+                    // Add any remaining text
+                    if (lastIndex < text.length) {
+                        fragment.appendChild(document.createTextNode(text.substring(lastIndex)));
+                    }
+
+                    // Replace the text node with the fragment
+                    textNode.parentNode.replaceChild(fragment, textNode);
+                }
+            }
+
+            // Event listeners
+            searchInput.addEventListener('input', performSearch);
+            searchInput.addEventListener('keyup', function (e) {
+                if (e.key === 'Escape') {
+                    searchInput.value = '';
+                    performSearch();
+                    searchInput.blur();
+                }
+            });
+
+            clearSearchBtn.addEventListener('click', function () {
+                searchInput.value = '';
+                performSearch();
+                searchInput.focus();
+            });
+
+            // Focus search input on page load
+            searchInput.focus();
+
+            // Remember functionality
+            initializeRememberFields();
+        });
+
+        // Remember fields functionality
+        function initializeRememberFields() {
+            // Add remember fields to all formulas that don't have them
+            var formulas = document.querySelectorAll('.formula');
+            for (var i = 0; i < formulas.length; i++) {
+                var formula = formulas[i];
+                var panel = formula.querySelector('.panel');
+                var existingRemember = panel.querySelector('.remember');
+
+                if (!existingRemember) {
+                    var rememberDiv = document.createElement('div');
+                    rememberDiv.className = 'remember';
+                    rememberDiv.innerHTML = `
+                        <strong>Husk:</strong>
+                        <p contenteditable="true" data-formula-id="${formula.id}">Klik her for at tilføje dine egne noter...</p>
+                        <div class="edit-hint">Klik for at redigere</div>
+                    `;
+                    panel.appendChild(rememberDiv);
+                } else {
+                    // Make existing remember fields editable
+                    var content = existingRemember.querySelector('p');
+                    if (content) {
+                        content.setAttribute('contenteditable', 'true');
+                        content.setAttribute('data-formula-id', formula.id);
+                    }
+                }
+            }
+
+            // Load saved notes
+            loadRememberNotes();
+
+            // Add click handlers
+            document.addEventListener('click', function (e) {
+                var remember = null;
+                var element = e.target;
+
+                // Find the closest .remember element (browser-compatible)
+                while (element && element !== document) {
+                    if (element.classList && element.classList.contains('remember')) {
+                        remember = element;
+                        break;
+                    }
+                    element = element.parentElement;
+                }
+
+                if (remember) {
+                    const content = remember.querySelector('p');
+
+                    if (content && !remember.classList.contains('editing')) {
+                        startEditing(remember, content);
+                    }
+                }
+            });
+
+            // Handle save on blur or Enter
+            document.addEventListener('blur', function (e) {
+                var content = e.target;
+                var remember = null;
+                var element = content;
+
+                // Find the closest .remember element (browser-compatible)
+                while (element && element !== document) {
+                    if (element.classList && element.classList.contains('remember')) {
+                        remember = element;
+                        break;
+                    }
+                    element = element.parentElement;
+                }
+
+                if (content.tagName === 'P' && content.hasAttribute('contenteditable') && remember) {
+                    saveAndStopEditing(remember, content);
+                }
+            }, true);
+
+            document.addEventListener('keydown', function (e) {
+                var content = e.target;
+                var remember = null;
+                var element = content;
+
+                // Find the closest .remember element (browser-compatible)
+                while (element && element !== document) {
+                    if (element.classList && element.classList.contains('remember')) {
+                        remember = element;
+                        break;
+                    }
+                    element = element.parentElement;
+                }
+
+                if (content.tagName === 'P' && content.hasAttribute('contenteditable') && remember) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        saveAndStopEditing(remember, content);
+                    }
+                }
+            });
+        }
+
+        function startEditing(remember, content) {
+            remember.classList.add('editing');
+            content.focus();
+
+            // Select all text if it's the default placeholder
+            if (content.textContent === 'Klik her for at tilføje dine egne noter...') {
+                var range = document.createRange();
+                range.selectNodeContents(content);
+                var selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+        }
+
+        function saveAndStopEditing(remember, content) {
+            var formulaId = content.getAttribute('data-formula-id');
+            var text = content.textContent.trim();
+
+            // Save to localStorage
+            if (text && text !== 'Klik her for at tilføje dine egne noter...') {
+                localStorage.setItem('remember_' + formulaId, text);
+            } else {
+                localStorage.removeItem('remember_' + formulaId);
+                content.textContent = 'Klik her for at tilføje dine egne noter...';
+            }
+
+            remember.classList.remove('editing');
+        }
+
+        function loadRememberNotes() {
+            var formulas = document.querySelectorAll('.formula');
+            for (var i = 0; i < formulas.length; i++) {
+                var formula = formulas[i];
+                var formulaId = formula.id;
+                var savedNote = localStorage.getItem('remember_' + formulaId);
+
+                if (savedNote) {
+                    var remember = formula.querySelector('.remember');
+                    var content = remember.querySelector('p');
+                    if (content) {
+                        content.textContent = savedNote;
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>

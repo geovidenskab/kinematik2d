@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kinematik 2D - Projektil Simulator</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 300;
+        }
+        .header p {
+            margin: 0.5rem 0 0 0;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 2rem;
+        }
+        .nav-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .nav-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+        .nav-card:hover {
+            border-color: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+        }
+        .nav-card h2 {
+            margin: 0 0 1rem 0;
+            color: #2563eb;
+            font-size: 1.5rem;
+        }
+        .nav-card p {
+            margin: 0;
+            color: #666;
+            line-height: 1.6;
+        }
+        .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        .footer {
+            background: #f8f9fa;
+            padding: 1rem 2rem;
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+            border-top: 1px solid #e9ecef;
+        }
+        @media (max-width: 768px) {
+            .nav-grid {
+                grid-template-columns: 1fr;
+            }
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Kinematik 2D</h1>
+            <p>Interaktiv projektil-simulator med og uden luftmodstand</p>
+        </div>
+        
+        <div class="content">
+            <div class="nav-grid">
+                <a href="simulering_2d.html" class="nav-card">
+                    <span class="icon">🚀</span>
+                    <h2>Projektil Simulator</h2>
+                    <p>Interaktiv 2D projektil-simulator med fysikberegninger, luftmodstand og grafisk visualisering. Juster parametre og se hvordan projektilen bevæger sig.</p>
+                </a>
+                
+                <a href="formelsamling.html" class="nav-card">
+                    <span class="icon">📚</span>
+                    <h2>Formelsamling</h2>
+                    <p>Komplet formelsamling for kinematik i 1D og 2D med eksempler, symboler og "Husk" noter. Søgbart og organiseret efter emner.</p>
+                </a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Udviklet af Philip Kruse Jakobsen • <a href="mailto:pj@sg.dk" style="color: #2563eb;">pj@sg.dk</a></p>
+        </div>
+    </div>
+</body>
+</html>
