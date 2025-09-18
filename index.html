@@ -489,6 +489,13 @@
                 </div>
 
                 <canvas id="canvas" width="800" height="500"></canvas>
+                
+                <div class="canvas-container" id="energyCanvasContainer" style="display: none; margin-top: 1rem;">
+                    <h3>Energianalyse</h3>
+                    <canvas id="energyCanvas" width="800" height="400"></canvas>
+                </div>
+                
+                <button id="toggleEnergyGraph" style="margin-top: 1rem;">Vis energianalyse</button>
 
                 <div class="results-grid">
                     <div class="result-box">
@@ -703,13 +710,28 @@
 
         function simuleringKvadratiskModstand() {
             const trajectories = [];
+            const energyData = [];
             let t = 0;
             let x = 0;
             let y = startHeight;
             let vx = vx0;
             let vy = vy0;
+            let totalWorkDone = 0; // Total arbejde udført af luftmodstand
+
+            // Initial energi
+            const initialKinetic = 0.5 * mass * (vx0 * vx0 + vy0 * vy0);
+            const initialPotential = mass * g * startHeight;
+            const initialTotalEnergy = initialKinetic + initialPotential;
 
             trajectories.push({ t: 0, x: 0, y: startHeight, vx, vy });
+            energyData.push({ 
+                t: 0, 
+                kinetic: initialKinetic, 
+                potential: initialPotential, 
+                total: initialTotalEnergy,
+                workDone: 0,
+                power: 0
+            });
 
             // Different stopping conditions based on target height
             if (targetHeight <= startHeight) {
@@ -719,6 +741,12 @@
                     const Fx = -kQuadPhys * v * vx / mass;
                     const Fy = -g - (kQuadPhys * v * vy) / mass;
 
+                    // Beregn effekt (power) fra luftmodstand
+                    const dragForce = kQuadPhys * v * v;
+                    const power = dragForce * v; // P = F * v
+                    const workThisStep = power * dt;
+                    totalWorkDone += workThisStep;
+
                     vx += Fx * dt;
                     vy += Fy * dt;
                     x += vx * dt;
@@ -727,6 +755,20 @@
 
                     if (y >= targetHeight) {
                         trajectories.push({ t, x, y, vx, vy });
+                        
+                        // Beregn nuværende energi
+                        const currentKinetic = 0.5 * mass * (vx * vx + vy * vy);
+                        const currentPotential = mass * g * y;
+                        const currentTotalEnergy = currentKinetic + currentPotential;
+                        
+                        energyData.push({ 
+                            t, 
+                            kinetic: currentKinetic, 
+                            potential: currentPotential, 
+                            total: currentTotalEnergy,
+                            workDone: totalWorkDone,
+                            power: power
+                        });
                     }
                 }
             } else {
@@ -736,6 +778,12 @@
                     const Fx = -kQuadPhys * v * vx / mass;
                     const Fy = -g - (kQuadPhys * v * vy) / mass;
 
+                    // Beregn effekt (power) fra luftmodstand
+                    const dragForce = kQuadPhys * v * v;
+                    const power = dragForce * v; // P = F * v
+                    const workThisStep = power * dt;
+                    totalWorkDone += workThisStep;
+
                     vx += Fx * dt;
                     vy += Fy * dt;
                     x += vx * dt;
@@ -743,10 +791,24 @@
                     t += dt;
 
                     trajectories.push({ t, x, y, vx, vy });
+                    
+                    // Beregn nuværende energi
+                    const currentKinetic = 0.5 * mass * (vx * vx + vy * vy);
+                    const currentPotential = mass * g * y;
+                    const currentTotalEnergy = currentKinetic + currentPotential;
+                    
+                    energyData.push({ 
+                        t, 
+                        kinetic: currentKinetic, 
+                        potential: currentPotential, 
+                        total: currentTotalEnergy,
+                        workDone: totalWorkDone,
+                        power: power
+                    });
                 }
             }
 
-            return trajectories;
+            return { trajectories, energyData, initialTotalEnergy, totalWorkDone };
         }
 
         function beregnIdealTrajectory() {
@@ -790,7 +852,8 @@
             ctx.clearRect(0, 0, width, height);
 
             const idealTraj = visUdenModstand ? beregnIdealTrajectory() : [];
-            const quadratisk = visKvadratiskNumerisk ? simuleringKvadratiskModstand() : [];
+            const quadratiskResult = visKvadratiskNumerisk ? simuleringKvadratiskModstand() : null;
+            const quadratisk = quadratiskResult ? quadratiskResult.trajectories : [];
 
             const allTrajs = [...idealTraj, ...quadratisk];
             if (allTrajs.length === 0) return;
@@ -967,7 +1030,193 @@
                 quadratisk: quadratisk.length > 0 ? quadratisk[quadratisk.length - 1] : null
             };
 
+            // Draw energy graph if enabled
+            if (quadratiskResult && quadratiskResult.energyData) {
+                drawEnergyGraph(quadratiskResult.energyData, quadratiskResult.initialTotalEnergy, quadratiskResult.totalWorkDone);
+            }
+
             updateDisplay();
+        }
+
+        function drawEnergyGraph(energyData, initialTotalEnergy, totalWorkDone) {
+            const energyCanvas = document.getElementById('energyCanvas');
+            const energyCtx = energyCanvas.getContext('2d');
+            const rect = energyCanvas.getBoundingClientRect();
+            const width = rect.width;
+            const height = rect.height;
+
+            energyCanvas.width = width;
+            energyCanvas.height = height;
+
+            energyCtx.clearRect(0, 0, width, height);
+
+            if (energyData.length === 0) return;
+
+            const margin = 50;
+            const plotWidth = width - 2 * margin;
+            const plotHeight = height - 2 * margin;
+
+            // Find data ranges
+            const maxTime = Math.max(...energyData.map(d => d.t));
+            const maxEnergy = Math.max(...energyData.map(d => d.total), initialTotalEnergy);
+            const maxPower = Math.max(...energyData.map(d => d.power));
+            const maxWork = Math.max(...energyData.map(d => d.workDone), totalWorkDone);
+
+            const scaleX = plotWidth / maxTime;
+            const scaleY = plotHeight / maxEnergy;
+            const scalePower = plotHeight / maxPower;
+            const scaleWork = plotHeight / maxWork;
+
+            function toEnergyCanvas(x, y) {
+                return [
+                    margin + x * scaleX,
+                    height - margin - y * scaleY
+                ];
+            }
+
+            function toPowerCanvas(x, y) {
+                return [
+                    margin + x * scaleX,
+                    height - margin - y * scalePower
+                ];
+            }
+
+            // Draw grid
+            energyCtx.strokeStyle = "#e0e0e0";
+            energyCtx.lineWidth = 1;
+            energyCtx.setLineDash([5, 5]);
+
+            for (let i = 0; i <= 10; i++) {
+                const x = margin + (i / 10) * plotWidth;
+                energyCtx.beginPath();
+                energyCtx.moveTo(x, margin);
+                energyCtx.lineTo(x, height - margin);
+                energyCtx.stroke();
+            }
+
+            for (let i = 0; i <= 10; i++) {
+                const y = margin + (i / 10) * plotHeight;
+                energyCtx.beginPath();
+                energyCtx.moveTo(margin, y);
+                energyCtx.lineTo(width - margin, y);
+                energyCtx.stroke();
+            }
+
+            energyCtx.setLineDash([]);
+
+            // Draw axes
+            energyCtx.strokeStyle = "#333";
+            energyCtx.lineWidth = 2;
+            energyCtx.beginPath();
+            energyCtx.moveTo(margin, height - margin);
+            energyCtx.lineTo(width - margin, height - margin);
+            energyCtx.moveTo(margin, height - margin);
+            energyCtx.lineTo(margin, margin);
+            energyCtx.stroke();
+
+            // Draw energy curves
+            if (energyData.length > 1) {
+                // Total energy
+                energyCtx.strokeStyle = "#dc2626";
+                energyCtx.lineWidth = 3;
+                energyCtx.beginPath();
+                const [x0, y0] = toEnergyCanvas(energyData[0].t, energyData[0].total);
+                energyCtx.moveTo(x0, y0);
+                for (let i = 1; i < energyData.length; i++) {
+                    const [x, y] = toEnergyCanvas(energyData[i].t, energyData[i].total);
+                    energyCtx.lineTo(x, y);
+                }
+                energyCtx.stroke();
+
+                // Kinetic energy
+                energyCtx.strokeStyle = "#2563eb";
+                energyCtx.lineWidth = 2;
+                energyCtx.beginPath();
+                const [x0k, y0k] = toEnergyCanvas(energyData[0].t, energyData[0].kinetic);
+                energyCtx.moveTo(x0k, y0k);
+                for (let i = 1; i < energyData.length; i++) {
+                    const [x, y] = toEnergyCanvas(energyData[i].t, energyData[i].kinetic);
+                    energyCtx.lineTo(x, y);
+                }
+                energyCtx.stroke();
+
+                // Potential energy
+                energyCtx.strokeStyle = "#16a34a";
+                energyCtx.lineWidth = 2;
+                energyCtx.beginPath();
+                const [x0p, y0p] = toEnergyCanvas(energyData[0].t, energyData[0].potential);
+                energyCtx.moveTo(x0p, y0p);
+                for (let i = 1; i < energyData.length; i++) {
+                    const [x, y] = toEnergyCanvas(energyData[i].t, energyData[i].potential);
+                    energyCtx.lineTo(x, y);
+                }
+                energyCtx.stroke();
+
+                // Work done by drag (dashed line)
+                energyCtx.strokeStyle = "#f59e0b";
+                energyCtx.lineWidth = 2;
+                energyCtx.setLineDash([10, 5]);
+                energyCtx.beginPath();
+                const [x0w, y0w] = toEnergyCanvas(energyData[0].t, energyData[0].workDone);
+                energyCtx.moveTo(x0w, y0w);
+                for (let i = 1; i < energyData.length; i++) {
+                    const [x, y] = toEnergyCanvas(energyData[i].t, energyData[i].workDone);
+                    energyCtx.lineTo(x, y);
+                }
+                energyCtx.stroke();
+                energyCtx.setLineDash([]);
+            }
+
+            // Axis labels
+            energyCtx.fillStyle = "#333";
+            energyCtx.font = "14px Arial";
+            energyCtx.textAlign = "center";
+            energyCtx.fillText("Tid (s)", width / 2, height - 10);
+
+            energyCtx.save();
+            energyCtx.translate(15, height / 2);
+            energyCtx.rotate(-Math.PI / 2);
+            energyCtx.fillText("Energi (J)", 0, 0);
+            energyCtx.restore();
+
+            // Legend
+            const legendY = 20;
+            const legendItems = [
+                { color: "#dc2626", label: "Total energi" },
+                { color: "#2563eb", label: "Kinetisk energi" },
+                { color: "#16a34a", label: "Potentiel energi" },
+                { color: "#f59e0b", label: "Arbejde fra luftmodstand" }
+            ];
+
+            energyCtx.font = "12px Arial";
+            energyCtx.textAlign = "left";
+            legendItems.forEach((item, index) => {
+                const x = width - 200;
+                const y = legendY + index * 20;
+                
+                energyCtx.fillStyle = item.color;
+                energyCtx.fillRect(x, y - 8, 15, 3);
+                if (item.label === "Arbejde fra luftmodstand") {
+                    energyCtx.setLineDash([5, 5]);
+                    energyCtx.strokeRect(x, y - 8, 15, 3);
+                    energyCtx.setLineDash([]);
+                }
+                
+                energyCtx.fillStyle = "#333";
+                energyCtx.fillText(item.label, x + 20, y);
+            });
+
+            // Energy balance text
+            const energyLoss = initialTotalEnergy - (energyData.length > 0 ? energyData[energyData.length - 1].total : 0);
+            const efficiency = energyData.length > 0 ? ((energyData[energyData.length - 1].total / initialTotalEnergy) * 100) : 100;
+            
+            energyCtx.fillStyle = "#333";
+            energyCtx.font = "12px Arial";
+            energyCtx.textAlign = "left";
+            energyCtx.fillText(`Initial energi: ${formatNumber(initialTotalEnergy, 1)} J`, 20, 20);
+            energyCtx.fillText(`Energitab: ${formatNumber(energyLoss, 1)} J`, 20, 40);
+            energyCtx.fillText(`Effektivitet: ${formatNumber(efficiency, 1)}%`, 20, 60);
+            energyCtx.fillText(`Total arbejde fra luftmodstand: ${formatNumber(totalWorkDone, 1)} J`, 20, 80);
         }
 
         function updateDisplay() {
@@ -1168,6 +1417,20 @@
                     formulas.style.display = 'none';
                     formulasDrag.style.display = 'none';
                     button.textContent = 'Vis ligninger';
+                }
+            });
+
+            // Energy graph toggle
+            document.getElementById('toggleEnergyGraph').addEventListener('click', () => {
+                const container = document.getElementById('energyCanvasContainer');
+                const button = document.getElementById('toggleEnergyGraph');
+                
+                if (container.style.display === 'none') {
+                    container.style.display = 'block';
+                    button.textContent = 'Skjul energianalyse';
+                } else {
+                    container.style.display = 'none';
+                    button.textContent = 'Vis energianalyse';
                 }
             });
 
