@@ -491,11 +491,14 @@
                 <canvas id="canvas" width="800" height="500"></canvas>
 
                 <div class="canvas-container" id="energyCanvasContainer" style="display: none; margin-top: 1rem;">
-                    <h3>Energianalyse</h3>
+                    <h3>Energianalyse - Med luftmodstand</h3>
+                    <p style="color: #6b7280; font-size: 0.875rem; margin-bottom: 1rem;">
+                        <strong>Bemærk:</strong> Energianalyse vises kun når "Med luftmodstand" er aktiveret
+                    </p>
                     <canvas id="energyCanvas" width="800" height="400"></canvas>
                 </div>
-
-                <button id="toggleEnergyGraph" style="margin-top: 1rem;">Vis energianalyse</button>
+                
+                <button id="toggleEnergyGraph" style="margin-top: 1rem;">Vis energianalyse (kun med luftmodstand)</button>
 
                 <div class="results-grid">
                     <div class="result-box">
@@ -1033,6 +1036,14 @@
             // Draw energy graph if enabled
             if (quadratiskResult && quadratiskResult.energyData) {
                 drawEnergyGraph(quadratiskResult.energyData, quadratiskResult.initialTotalEnergy, quadratiskResult.totalWorkDone);
+            } else {
+                // Hide energy graph if no air resistance
+                const energyContainer = document.getElementById('energyCanvasContainer');
+                const energyButton = document.getElementById('toggleEnergyGraph');
+                if (energyContainer && energyContainer.style.display !== 'none') {
+                    energyContainer.style.display = 'none';
+                    energyButton.textContent = 'Vis energianalyse (kun med luftmodstand)';
+                }
             }
 
             updateDisplay();
@@ -1041,11 +1052,11 @@
         function drawEnergyGraph(energyData, initialTotalEnergy, totalWorkDone) {
             const energyCanvas = document.getElementById('energyCanvas');
             const energyCtx = energyCanvas.getContext('2d');
-            
+
             // Set fixed dimensions
             const width = 800;
             const height = 400;
-            
+
             energyCanvas.width = width;
             energyCanvas.height = height;
 
@@ -1425,13 +1436,17 @@
             document.getElementById('toggleEnergyGraph').addEventListener('click', () => {
                 const container = document.getElementById('energyCanvasContainer');
                 const button = document.getElementById('toggleEnergyGraph');
-
+                
                 if (container.style.display === 'none') {
-                    container.style.display = 'block';
-                    button.textContent = 'Skjul energianalyse';
+                    if (visKvadratiskNumerisk) {
+                        container.style.display = 'block';
+                        button.textContent = 'Skjul energianalyse';
+                    } else {
+                        alert('Aktivér "Med luftmodstand" for at se energianalyse');
+                    }
                 } else {
                     container.style.display = 'none';
-                    button.textContent = 'Vis energianalyse';
+                    button.textContent = 'Vis energianalyse (kun med luftmodstand)';
                 }
             });
 
